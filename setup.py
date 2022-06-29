@@ -7,26 +7,28 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 about = dict()
 
-with open(os.path.join(HERE, "GeoTiler", "__version__.py"), "r") as f:
+with open(os.path.join(HERE, "geoTile", "__version__.py"), "r") as f:
     exec(f.read(), about)
 
 with open("Readme.MD", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="geotiler",
+    name="geotile",
     version=about["__version__"],
     author=about["__author__"],
     author_email=about["__email__"],
     description="Package for working with geographic raster tiles",
-    py_modules=["geotiler"],
+    py_modules=["geotile"],
     license="MIT License",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/iamtekson/geotiler",
-    packages=["GeoTiler"],
+    url="https://github.com/iamtekson/geotile",
+    packages=["geoTile"],
     keywords=[
-        "geotiler",
+        "geotile",
+        "geotiling",
+        "geoTiler",
         "geospatial",
         "geospatial data",
         "geospatial raster tiles",

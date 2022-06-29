@@ -62,7 +62,3 @@ def mosaic_rasters(input_folder: str, output_file: str, image_format: Optional[s
         outds.write(mosaic)
 
     return output_file
-
-
-if __name__ == '__main__':
-    mosaic_rasters()

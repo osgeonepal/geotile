@@ -1,7 +1,7 @@
-GeoTiler
-========
+geoTile
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   GeoTiler
+   geoTile

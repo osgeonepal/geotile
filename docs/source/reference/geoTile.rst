@@ -1,21 +1,21 @@
-GeoTiler package
-================
+geoTile package
+===============
 
 Submodules
 ----------
 
-GeoTiler.GeoTiler module
-------------------------
+geoTile.GeoTile module
+----------------------
 
-.. automodule:: GeoTiler.GeoTiler
+.. automodule:: geoTile.GeoTile
    :members:
    :undoc-members:
    :show-inheritance:
 
-GeoTiler.utils module
----------------------
+geoTile.utils module
+--------------------
 
-.. automodule:: GeoTiler.utils
+.. automodule:: geoTile.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ GeoTiler.utils module
 Module contents
 ---------------
 
-.. automodule:: GeoTiler
+.. automodule:: geoTile
    :members:
    :undoc-members:
    :show-inheritance:
