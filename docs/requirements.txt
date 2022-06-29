@@ -1,0 +1,5 @@
+sphnix_gallery
+myst_parser
+nbsphinx
+numpydoc
+sphinx_toggleprompt
