@@ -11,6 +11,7 @@ Welcome to GeoTiler's documentation!
    :caption: Contents:
 
    reference/modules
+   about
 
 
 

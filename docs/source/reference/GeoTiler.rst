@@ -12,6 +12,14 @@ GeoTiler.GeoTiler module
    :undoc-members:
    :show-inheritance:
 
+GeoTiler.utils module
+---------------------
+
+.. automodule:: GeoTiler.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

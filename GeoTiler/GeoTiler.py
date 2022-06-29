@@ -2,13 +2,15 @@
 import os
 import itertools
 import glob
-from typing import List, Optional, Set
+from typing import Optional
 
 # rasterio library
 import rasterio as rio
 from rasterio import windows
 from rasterio.merge import merge
 from rasterio.mask import mask
+from rasterio.warp import calculate_default_transform, reproject
+from rasterio.enums import Resampling
 from rasterio.features import rasterize
 
 # geopandas library
@@ -26,18 +28,18 @@ class GeoTiler:
                     Raster dataset
                 meta : dict
                     Raster metadata
-                height : int 
+                height : int
                     Raster height
                 width : int
                     Raster width
                 crs : str
-                    Raster crs (e.g. 'EPSG:4326'). The will be generated automatically. 
-                    In case of non-geographic raster, the crs will be None. 
-                stride_x : int 
+                    Raster crs (e.g. 'EPSG:4326'). The will be generated automatically.
+                    In case of non-geographic raster, the crs will be None.
+                stride_x : int
                     The stride of the x axis (int), default is 128
                 stride_y : int
                     The stride of the y axis (int), default is 128
-                tile_x : int 
+                tile_x : int
                     The size of the tile in x axis (int), default is 256
                 tile_y : int
                     The size of the tile in y axis (int), default is 256
@@ -79,7 +81,7 @@ class GeoTiler:
         self.meta['crs'] = self.ds.crs
 
     def _calculate_offset(self, stride_x: Optional[int] = None, stride_y: Optional[int] = None) -> tuple:
-        """Calculate the offset for the whole dataset 
+        """Calculate the offset for the whole dataset
 
             Parameters
             ----------
@@ -117,11 +119,11 @@ class GeoTiler:
 
             Parameters
             ----------
-                output_folder : str 
+                output_folder : str
                     Path to the output folder
                 out_bands : list
                     The bands to save (eg. [3, 2, 1]), if None, the output bands will be same as the input raster bands
-                image_format : str 
+                image_format : str
                     The image format (eg. tif), if None, the image format will be the same as the input raster format (eg. tif)
                 dtype : str, np.dtype
                     The output dtype (eg. uint8, float32), if None, the dtype will be the same as the input raster
@@ -132,7 +134,7 @@ class GeoTiler:
                 stride_x: int
                     The stride of the x axis, Default value is 128
                 stride_y: int
-                    The stride of the y axis, Default value is 128 
+                    The stride of the y axis, Default value is 128
 
             Returns
             -------
@@ -192,26 +194,27 @@ class GeoTiler:
                 outds.write(self.ds.read(
                     out_bands, window=window).astype(dtype))
 
-    def mosaic_rasters(self, input_folder: str, output_file: str, image_format: Optional[str] = 'tif', **kwargs):
+    def mosaic_rasters(self, input_folder: str, out_path: str, image_format: Optional[str] = 'tif', **kwargs):
         """Mosaic the rasters inside the input folder
 
             This method is used to merge the tiles into single file
 
             Parameters
             ----------
-                input_folder: str, python path 
+                input_folder: str, python path
                     Path to the input folder
-                output_file: str, python path
+                out_path: str, python path
                     Path to the output file
                 image_format: str
                     The image format (eg. tif), if None, the image format will be the same as the input raster format.
-                kwargs: dict 
-                    The kwargs from rasterio.merge.merge can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.merge.html#rasterio.merge.merge (e.g. bounds, res, nodata etc.)
+                kwargs: dict
+                    # rasterio.merge.merge (e.g. bounds, res, nodata etc.)
+                    The kwargs from rasterio.merge.merge can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.merge.html
 
             Returns
             -------
-                output_file
-                    Save the mosaic as a output_file. Returns the output_file path
+                out_path
+                    Save the mosaic as a out_path. Returns the out_path path
 
             Examples
             --------
@@ -243,32 +246,33 @@ class GeoTiler:
         })
 
         # write the output raster
-        with rio.open(output_file, 'w', **meta) as outds:
+        with rio.open(out_path, 'w', **meta) as outds:
             outds.write(mosaic)
 
-        return output_file
+        return out_path
 
-    def generate_raster_mask_from_shapefile(self, input_shapefile: str, output_file: str, crop=True, invert=False, **kwargs):
+    def generate_raster_mask_from_shapefile(self, input_shapefile: str, out_path: str, crop=True, invert=False, **kwargs):
         """Generate a mask raster from a shapefile
 
             Parameters
             ----------
                 input_shapefile: str, python path
                     Path to the input shapefile
-                output_file: Str, python Path
-                    Path to the output location of the mask raster   
+                out_path: Str, python Path
+                    Path to the output location of the mask raster
                 crop: bool
                     If True, the mask will be cropped to the extent of the shapefile
                     If false, the mask will be the same size as the raster
                 invert: bool
                     If True, the mask will be inverted, pixels outside the mask will be filled with 1 and pixels inside the mask will be filled with 0
                 kwargs: dict
-                    The kwargs from rasterio.mask.mask can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.mask.html#rasterio.mask.mask (e.g. bounds, res, nodataetc.)
+                    # rasterio.mask.mask (e.g. bounds, res, nodataetc.)
+                    The kwargs from rasterio.mask.mask can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.mask.html
 
             Returns
             -------
-                output_file   
-                    Save the mask as a output_file 
+                out_path
+                    Save the mask as a out_path
 
             Examples:
                 >>> import GeoTiler
@@ -297,31 +301,32 @@ class GeoTiler:
             "transform": out_transform})
 
         # write the output raster
-        with rio.open(output_file, 'w', **out_meta) as outds:
+        with rio.open(out_path, 'w', **out_meta) as outds:
             outds.write(out_image)
 
-    def rasterize_shapefile(self, input_shapefile: str, output_file: str, value_col=None, **kwargs):
+    def rasterize_shapefile(self, input_shapefile: str, out_path: str, value_col=None, **kwargs):
         """Rasterize a shapefile to a raster
 
             Parameters
             ----------
-                input_shapefile: str, python path 
+                input_shapefile: str, python path
                     Path to the input shapefile
-                output_file: str, python path 
-                    Path to the output location of the rasterized shapefile  
+                out_path: str, python path
+                    Path to the output location of the rasterized shapefile
                 value_col: str
-                    The column name of the shapefile to be rasterized 
-                    If None, the rasterization will be binary otherwise the rasterization will be the based on value of the column 
+                    The column name of the shapefile to be rasterized
+                    If None, the rasterization will be binary otherwise the rasterization will be the based on value of the column
                 kwargs: dict
-                    The kwargs from rasterio.rasterize can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.rasterize.html#rasterio.rasterize.rasterize (e.g. fill, transform etc.)
+                    # rasterio.rasterize.rasterize (e.g. fill, transform etc.)
+                    The kwargs from rasterio.rasterize can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.rasterize.html
 
 
             Returns
             -------
-                None: save the rasterized shapefile as a output_file 
+                None: save the rasterized shapefile as a out_path
 
             Examples:
-                >>> import GeoTiler 
+                >>> import GeoTiler
                 >>> tiler = GeoTiler.GeoTiler('/path/to/raster/file.tif')
                 >>> tiler.rasterize_shapefile('/path/to/shapefile.shp', '/path/to/output/file.tif')
         """
@@ -347,8 +352,110 @@ class GeoTiler:
         meta.update({'count': 1, "dtype": "uint8"})
 
         # write the output raster
-        with rio.open(output_file, 'w', **meta) as outds:
+        with rio.open(out_path, 'w', **meta) as outds:
             outds.write(mask)
+
+    def reproject_raster(self, out_path: str, out_crs: str, resampling_method: str = 'nearest'):
+        """Reproject a raster to a new coordinate system
+
+            Parameters:
+                out_path: str, python path
+                    Path to the output location of the reprojected raster
+                out_crs: str
+                    The coordinate system of the output raster (e.g. 'EPSG:4326')
+                resampling_method: str
+                    The resampling method to use (e.g. 'bilinear')
+                    It should be one of following,
+                    "nearest", "bilinear", "cubic", "cubic_spline", "lanczos", "average",
+                    "mode", "gauss", "max", "min", "median", "q1", "q3", "std", "sum", "rms"
+
+            Returns:
+                out_path: str
+                    Path to the output location of the reprojected raster
+
+            Examples:
+                >>> import GeoTiler
+                >>> tiler = GeoTiler.GeoTiler('/path/to/raster/file.tif')
+                >>> tiler.reproject_raster('/path/to/output/file.tif', 'EPSG:4326')
+        """
+        # reproject raster to project crs
+        with rio.open(self.path) as src:
+            src_crs = src.crs
+            transform, width, height = calculate_default_transform(
+                src_crs, out_crs, src.width, src.height, *src.bounds)
+            kwargs = src.meta.copy()
+
+            kwargs.update({
+                'crs': out_crs,
+                'transform': transform,
+                'width': width,
+                'height': height})
+
+            with rio.open(out_path, 'w', **kwargs) as dst:
+                for i in range(1, src.count + 1):
+                    reproject(
+                        source=rio.band(src, i),
+                        destination=rio.band(dst, i),
+                        src_transform=src.transform,
+                        src_crs=src.crs,
+                        dst_transform=transform,
+                        dst_crs=out_crs,
+                        resampling=Resampling[resampling_method])
+        return(out_path)
+
+    def resample_raster(self, out_path: str, upscale_factor: int, resampling_method: str = 'bilinear'):
+        """Resample a raster to a new resolution
+
+            Parameters:
+                out_path: str, python path
+                    Path to the output location of the resampled raster
+                upscale_factor: int
+                    The upscale factor of the output raster (e.g. 2)
+                    If you want to downscale by 2, that mean upscale_factor = 0.5
+                resampling_method: str
+                    The resampling method to use (e.g. 'bilinear')
+                    It should be one of following,
+                    "nearest", "bilinear", "cubic", "cubic_spline", "lanczos", "average",
+                    "mode", "gauss", "max", "min", "median", "q1", "q3", "std", "sum", "rms"
+
+            Returns:
+                out_path: str
+                    Path to the output location of the resampled raster
+
+            Examples:
+                >>> import GeoTiler
+                >>> tiler = GeoTiler.GeoTiler('/path/to/raster/file.tif')
+                >>> tiler.resample_raster('/path/to/output/file.tif', 2)
+        """
+        # target dataset
+        data = self.ds.read(
+            out_shape=(
+                self.ds.count,
+                int(self.ds.height * upscale_factor),
+                int(self.ds.width * upscale_factor)
+            ),
+            resampling=Resampling[resampling_method]
+        )
+
+        # scale image transform
+        transform = self.ds.transform * self.ds.transform.scale(
+            (self.ds.width / data.shape[-1]),
+            (self.ds.height / data.shape[-2])
+        )
+
+        # update metadata
+        meta = self.meta.copy()
+        meta.update({
+            "transform": transform,
+            "width": int(self.ds.width * upscale_factor),
+            "height": int(self.ds.height * upscale_factor),
+        })
+
+        # write the output raster
+        with rio.open(out_path, 'w', **meta) as outds:
+            outds.write(data)
+
+        return(out_path)
 
     def close(self):
         """Close the dataset
