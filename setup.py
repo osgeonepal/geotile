@@ -10,7 +10,7 @@ about = dict()
 with open(os.path.join(HERE, "geoTile", "__version__.py"), "r") as f:
     exec(f.read(), about)
 
-with open("Readme.MD", "r") as fh:
+with open("./README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
