@@ -6,6 +6,20 @@
 GeoTiles Documentation
 ======================
 
+.. toctree::
+   :maxdepth: 2
+   :caption: GeoTile Documentation
+   :hidden: 
+
+   
+   Home <self>
+   About <about>
+   Getting Started <getting_started>
+   API reference <reference/modules>
+   Change Log <pages/changelog>
+   License <license>
+   
+
 GeoTile is an open source python library for creating and manipulating the tiles of the raster dataset. It is based on the `Rasterio`_ library.
 
 .. _`Rasterio`: https://rasterio.readthedocs.io/en/latest/
@@ -22,23 +36,6 @@ Useful links
 - `Binary Installers (PyPI) <https://pypi.org/project/geotile/>`_
 - `Source Repository (GitHub) <https://github.com/iamtekson/geotile>`_ 
 - `Issues & Ideas <https://github.com/iamtekson/geotile/issues>`_ 
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: GeoTile Documentation
-   :hidden: 
-
-   
-   Home <self>
-   About <about>
-   Getting Started <getting_started>
-   License <license>
-   API reference <reference/modules>
-   Change Log <pages/changelog>
-   
-
-
 
 Indices and tables
 ==================
