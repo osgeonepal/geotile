@@ -3,8 +3,8 @@
 Now it is time to initialize the library and work with your raster data. First of all, you need to import the library and initialize the library your raster file as below,
 
 ```python
-import GeoTile
-gt = GeoTile(r"path/to/raster/data.tif")
+from geotile import GeoTile
+gt = GeoTile('/path/to/raster/file.tif')
 ```
 
 After initializing the `GeoTile` class, the library will be able to read the file. Now you have access to use the `GeoTile` methods.
@@ -45,8 +45,8 @@ mosaic_rasters('/path/to/input/folder', '/path/to/output/file.tif')
 To generate the raster mask from shapefile, you need to initialize the GeoTile class first,
 
 ```python
-import GeoTile
-gt = GeoTile(r"path/to/raster/data.tif")
+from geotile import GeoTile
+gt = GeoTile('/path/to/raster/file.tif')
 
 # generate shapefile mask
 gt.generate_raster_mask_from_shapefile('/path/to/shapefile.shp', '/path/to/output/file.tif')

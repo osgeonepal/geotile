@@ -30,8 +30,8 @@ def mosaic_rasters(input_folder: str, output_file: str, image_format: Optional[s
 
         Examples
         --------
-            >>> import GeoTiler
-            >>> tiler = GeoTiler.GeoTiler('/path/to/raster/file.tif')
+            >>> from geotile import GeoTile
+            >>> tiler = GeoTile('/path/to/raster/file.tif')
             >>> tiler.mosaic_rasters('/path/to/input/folder', '/path/to/output/file.tif')
     """
 

@@ -57,7 +57,7 @@ class GeoTile:
             -------
                 None: Read raster and assign metadata of raster to the class
         """
-        self._read_raster(self, path)
+        self._read_raster(path)
 
     def __del__(self):
         self.ds.close()
@@ -142,8 +142,8 @@ class GeoTile:
 
             Examples
             --------
-                >>> import GeoTile
-                >>> tiler = GeoTile.GeoTile('/path/to/raster/file.tif')
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.generate_raster_tiles('/path/to/output/folder')
                     # save the specific bands with other than default size
                 >>> tiler.generate_raster_tiles('/path/to/output/folder', [3, 2, 1], tile_x=512, tile_y=512, stride_x=0, stride_y=0)
@@ -218,8 +218,8 @@ class GeoTile:
 
             Examples
             --------
-                >>> import GeoTile
-                >>> tiler = GeoTile.GeoTile('/path/to/raster/file.tif')
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.mosaic_rasters('/path/to/input/folder', '/path/to/output/file.tif')
         """
 
@@ -275,8 +275,8 @@ class GeoTile:
                     Save the mask as a out_path
 
             Examples:
-                >>> import GeoTile
-                >>> tiler = GeoTile.GeoTile('/path/to/raster/file.tif')
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.generate_raster_mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
         """
 
@@ -326,8 +326,8 @@ class GeoTile:
                 None: save the rasterized shapefile as a out_path
 
             Examples:
-                >>> import GeoTile
-                >>> tiler = GeoTile.GeoTile('/path/to/raster/file.tif')
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.rasterize_shapefile('/path/to/shapefile.shp', '/path/to/output/file.tif')
         """
 
@@ -374,8 +374,8 @@ class GeoTile:
                     Path to the output location of the reprojected raster
 
             Examples:
-                >>> import GeoTile
-                >>> tiler = GeoTile.GeoTile('/path/to/raster/file.tif')
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.reproject_raster('/path/to/output/file.tif', 'EPSG:4326')
         """
         # reproject raster to project crs
@@ -423,8 +423,8 @@ class GeoTile:
                     Path to the output location of the resampled raster
 
             Examples:
-                >>> import GeoTile
-                >>> tiler = GeoTile.GeoTile('/path/to/raster/file.tif')
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.resample_raster('/path/to/output/file.tif', 2)
         """
         # target dataset
