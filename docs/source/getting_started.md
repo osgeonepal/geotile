@@ -7,7 +7,8 @@ caption: Getting Started
 hidden:
 ---
 Installation <pages/install>
-Basic function <pages/basic>
+Basic functions <pages/basic>
+Advance functions <pages/advance>
 ```
 
 ## Installation
@@ -27,4 +28,5 @@ Do you prefer `pip install` or installation from source? Or specific version? Se
 ## What now?
 
 - Now it is time to getting started with [basic function](pages/basic)
+- Explore the possibilities of `GeoTile` library, [advance docs](pages/advance)
 - If you are familier with basic function of GeoTile library, check the [API Reference](reference/modules)

@@ -53,3 +53,7 @@ gt.generate_raster_mask_from_shapefile('/path/to/shapefile.shp', '/path/to/outpu
 ```
 
 The output raster will have simillar metadata as the input raster.
+
+## More functions
+
+**TO DO**
