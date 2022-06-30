@@ -1,4 +1,4 @@
-# GeoTiler
+# GeoTile
 
 GeoTile is an open-source python library for creating and manipulating the tiles of the raster dataset. The package will be very useful for managing the raster tiles which can be used for deep learning traing dataset.
 
