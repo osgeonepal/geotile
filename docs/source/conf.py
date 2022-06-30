@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'GeoTiler'
+project = 'GeoTile'
 copyright = '2022, Tek Kshetri'
 author = 'Tek Kshetri'
 
@@ -84,7 +84,15 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "search_bar_position": "sidebar",
-    "github_url": "https://github.com/iamtekson/geotiler",
-    "twitter_url": "https://twitter.com/geotiler",
-    # "use_edit_page_button": True,
+    "github_url": "https://github.com/iamtekson/geotile",
+    "twitter_url": "https://twitter.com/geotile",
+    "use_edit_page_button": True,
+}
+
+# to add the edit page button
+html_context = {
+    "github_user": "iamtekson",
+    "github_repo": "geotile",
+    "github_version": "main",
+    "doc_path": "docs/source",
 }

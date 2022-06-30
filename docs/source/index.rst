@@ -1,17 +1,42 @@
-.. GeoTiler documentation master file, created by
+.. GeoTile documentation master file, created by
    sphinx-quickstart on Tue Jun 28 10:49:49 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to GeoTiler's documentation!
-====================================
+GeoTiles Documentation
+======================
+
+GeoTile is an open source python library for creating and manipulating the tiles of the raster dataset. It is based on the `Rasterio`_ library.
+
+.. _`Rasterio`: https://rasterio.readthedocs.io/en/latest/
+
+Motivation
+----------
+
+The main motivation to write this library is to make it easier to create tiles of the raster dataset as a deep learning training dataset.
+Since the library is extended to the Rasterio package, it also supports some very useful raster analysis function like, reprojection of raster, resampling of raster, raster masking etc.
+
+Useful links
+------------
+
+- `Binary Installers (PyPI) <https://pypi.org/project/geotile/>`_
+- `Source Repository (GitHub) <https://github.com/iamtekson/geotile>`_ 
+- `Issues & Ideas <https://github.com/iamtekson/geotile/issues>`_ 
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: GeoTile Documentation
+   :hidden: 
 
-   reference/modules
-   about
+   
+   Home <self>
+   About <about>
+   Getting Started <getting_started>
+   License <license>
+   API reference <reference/modules>
+   Change Log <pages/changelog>
+   
 
 
 
