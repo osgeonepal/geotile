@@ -8,6 +8,8 @@ The complete documentation of this package is available here: https://geotile.re
 
 ## Installation
 
+If all of the dependencies ([rasterio](https://rasterio.readthedocs.io/en/latest/) and [geopandas](https://geopandas.org/en/stable/index.html)) are installed already, the library can be installed with pip as,
+
 ```shell
 pip install geotile
 ```
