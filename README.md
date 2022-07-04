@@ -29,6 +29,13 @@ gt = GeoTile(r"path/to/raster/data.tif")
 # to generate the tiles of raster
 gt.generate_tiles(r'/path/to/output/folder', tile_x=256, tile_y=256, stride_x=256, stride_y=256)
 
+# to generate the tiles of selected bands only
+gt.generate_tiles(r'/path/to/output/folder', bands=[4, 3, 2], tile_x=256, tile_y=256, stride_x=256, stride_y=256)
+
+# to merge the tiles
+from geotile import mosaic
+mosaic('/path/to/input/folder/tiles', output_file='path/to/output/file.tif')
+
 # to generate the raster mask from shapefile
 gt.mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
 ```
