@@ -3,6 +3,9 @@ import os
 import itertools
 import glob
 from typing import Optional
+import pathlib
+
+import numpy as np
 
 # rasterio library
 import rasterio as rio
@@ -103,11 +106,11 @@ class GeoTile:
         offsets = list(itertools.product(X, Y))
         return offsets
 
-    def generate_raster_tiles(
+    def generate_tiles(
             self,
             output_folder: str,
             out_bands: Optional[list] = None,
-            image_format: Optional[str] = 'tif',
+            image_format: Optional[str] = None,
             dtype: Optional[str] = None,
             tile_x: Optional[int] = 256,
             tile_y: Optional[int] = 256,
@@ -156,6 +159,9 @@ class GeoTile:
         self.stride_x = stride_x
         self.stride_y = stride_y
 
+        if image_format is None:
+            image_format = pathlib.Path(self.path).suffix
+
         # create the output folder if it doesn't exist
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
@@ -200,75 +206,20 @@ class GeoTile:
                 outds.write(self.ds.read(
                     out_bands, window=window, fill_value=nodata, boundless=True).astype(dtype))
 
-    def mosaic_rasters(self, input_folder: str, out_path: str, image_format: Optional[str] = 'tif', **kwargs):
-        """Mosaic the rasters inside the input folder
-
-            This method is used to merge the tiles into single file
-
-            Parameters
-            ----------
-                input_folder: str, python path
-                    Path to the input folder
-                out_path: str, python path
-                    Path to the output file
-                image_format: str
-                    The image format (eg. tif), if None, the image format will be the same as the input raster format.
-                kwargs: dict
-                    # rasterio.merge.merge (e.g. bounds, res, nodata etc.)
-                    The kwargs from rasterio.merge.merge can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.merge.html
-
-            Returns
-            -------
-                out_path
-                    Save the mosaic as a out_path. Returns the out_path path
-
-            Examples
-            --------
-                >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.mosaic_rasters('/path/to/input/folder', '/path/to/output/file.tif')
-        """
-
-        # get the list of input rasters to merge
-        search_criteria = "*.{}".format(image_format)
-        q = os.path.join(input_folder, search_criteria)
-        input_files = sorted(glob.glob(q))
-
-        # Open and add all the input rasters to a list
-        src_files_to_mosaic = []
-        for files in input_files:
-            src = rio.open(files)
-            src_files_to_mosaic.append(src)
-
-        # Merge the rasters
-        mosaic, out_trans = merge(src_files_to_mosaic, **kwargs)
-
-        # update the metadata
-        meta = src.meta.copy()
-        meta.update({
-            "height": mosaic.shape[1],
-            "width": mosaic.shape[2],
-            "transform": out_trans,
-        })
-
-        # write the output raster
-        with rio.open(out_path, 'w', **meta) as outds:
-            outds.write(mosaic)
-
-        return out_path
-
-    def generate_raster_mask_from_shapefile(self, input_shapefile: str, out_path: str, crop=True, invert=False, **kwargs):
-        """Generate a mask raster from a shapefile
+    def mask(self, input_vector: str, out_path: str, crop=False, invert=False, **kwargs):
+        """Generate a mask raster from a vector
+            This tool is similar to QGIS clip raster by mask layer (https://docs.qgis.org/2.8/en/docs/user_manual/processing_algs/gdalogr/gdal_extraction/cliprasterbymasklayer.html)
 
             Parameters
             ----------
-                input_shapefile: str, python path
-                    Path to the input shapefile
+                input_vector: str, python path
+                    Path to the input vector (supports: shp, geojson, zip)
+                    All the vector formats supported by geopandas are supported
                 out_path: Str, python Path
                     Path to the output location of the mask raster
                 crop: bool
-                    If True, the mask will be cropped to the extent of the shapefile
-                    If false, the mask will be the same size as the raster
+                    If True, the mask will be cropped to the extent of the vector
+                    If False, the mask will be the same size as the raster
                 invert: bool
                     If True, the mask will be inverted, pixels outside the mask will be filled with 1 and pixels inside the mask will be filled with 0
                 kwargs: dict
@@ -283,18 +234,18 @@ class GeoTile:
             Examples:
                 >>> from geotile import GeoTile
                 >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.generate_raster_mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
+                >>> tiler.generate_raster_mask('/path/to/vector.shp', '/path/to/output/file.tif')
         """
 
-        # open the input shapefile
-        df = gpd.read_file(input_shapefile)
+        # open the input vector
+        df = gpd.read_file(input_vector)
 
-        # check the coordinate system for both raster and shapefile and reproject shapefile if necessary
+        # check the coordinate system for both raster and vector and reproject vector if necessary
         raster_crs = self.meta['crs']
         if raster_crs != df.crs:
             df = df.to_crs(raster_crs)
 
-        # get the bounds of the shapefile
+        # get the bounds of the vector
         with rio.open(self.path) as src:
             out_image, out_transform = mask(
                 src, df["geometry"], crop=crop, invert=invert, **kwargs)
@@ -310,17 +261,20 @@ class GeoTile:
         with rio.open(out_path, 'w', **out_meta) as outds:
             outds.write(out_image)
 
-    def rasterize_shapefile(self, input_shapefile: str, out_path: str, value_col=None, **kwargs):
-        """Rasterize a shapefile to a raster
+    def rasterization(self, input_vector: str, out_path: str, value_col=None, **kwargs):
+        """Convert vector shapes into raster 
+            The metadata of the raster will be the same as the raster from GeoTile class.
+            The raster will be filled with the value of the value_col of the vector.
 
             Parameters
             ----------
-                input_shapefile: str, python path
-                    Path to the input shapefile
+                input_vector: str, python path
+                    Path to the input vector (supports: shp, geojson, zip)
+                    All the vector formats supported by geopandas are supported
                 out_path: str, python path
-                    Path to the output location of the rasterized shapefile
+                    Path to the output location of the rasterized vector
                 value_col: str
-                    The column name of the shapefile to be rasterized
+                    The column name of the vector to be rasterized
                     If None, the rasterization will be binary otherwise the rasterization will be the based on value of the column
                 kwargs: dict
                     # rasterio.rasterize.rasterize (e.g. fill, transform etc.)
@@ -329,29 +283,30 @@ class GeoTile:
 
             Returns
             -------
-                None: save the rasterized shapefile as a out_path
+                None: save the rasterized vector as a out_path
 
             Examples:
                 >>> from geotile import GeoTile
                 >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.rasterize_shapefile('/path/to/shapefile.shp', '/path/to/output/file.tif')
+                >>> tiler.rasterize_vector('/path/to/vector.shp', '/path/to/output/file.tif')
         """
 
-        # open the input shapefile
-        df = gpd.read_file(input_shapefile)
+        # open the input vector
+        df = gpd.read_file(input_vector)
 
-        # check the coordinate system for both raster and shapefile and reproject shapefile if necessary
+        # check the coordinate system for both raster and vector and reproject vector if necessary
         raster_crs = self.meta['crs']
         if raster_crs != df.crs:
             df = df.to_crs(raster_crs)
 
-        # if value column is specified, rasterize the shapefile based on value column else bianary classification
+        # if value column is specified, rasterize the vector based on value column else bianary classification
         dataset = zip(df['geometry'], df[value_col]
                       ) if value_col else df['geometry']
 
-        # rasterize the shapefile based on raster metadata
+        # rasterize the vector based on raster metadata
         mask = rasterize(dataset, self.ds.shape,
                          transform=self.meta['transform'], **kwargs)
+        mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
 
         # update the metadata
         meta = self.meta.copy()
@@ -361,7 +316,7 @@ class GeoTile:
         with rio.open(out_path, 'w', **meta) as outds:
             outds.write(mask)
 
-    def reproject_raster(self, out_path: str, out_crs: str, resampling_method: str = 'nearest'):
+    def reprojection(self, out_path: str, out_crs: str, resampling_method: str = 'nearest'):
         """Reproject a raster to a new coordinate system
 
             Parameters:
@@ -409,14 +364,15 @@ class GeoTile:
                         resampling=Resampling[resampling_method])
         return(out_path)
 
-    def resample_raster(self, out_path: str, upscale_factor: int, resampling_method: str = 'bilinear'):
+    def resample(self, out_path: str, upscale_factor: int, resampling_method: str = 'bilinear'):
         """Resample a raster to a new resolution
+
 
             Parameters:
                 out_path: str, python path
                     Path to the output location of the resampled raster
                 upscale_factor: int
-                    The upscale factor of the output raster (e.g. 2)
+                    The upscale factor of the output raster (e.g. 2, i.e. 10x10 cell size to 5x5 cell size)
                     If you want to downscale by 2, that mean upscale_factor = 0.5
                 resampling_method: str
                     The resampling method to use (e.g. 'bilinear')
