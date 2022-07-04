@@ -1,4 +1,4 @@
-sphnix_gallery
+sphinx_gallery
 myst_parser
 nbsphinx
 numpydoc
