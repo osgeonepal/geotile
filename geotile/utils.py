@@ -30,9 +30,8 @@ def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 't
 
         Examples
         --------
-            >>> from geotile import GeoTile
-            >>> tiler = GeoTile('/path/to/raster/file.tif')
-            >>> tiler.mosaic_rasters('/path/to/input/folder', '/path/to/output/file.tif')
+            >>> from geotile import mosaic
+            >>> mosaic('/path/to/input/folder', '/path/to/output/file.tif')
     """
 
     # get the list of input rasters to merge
