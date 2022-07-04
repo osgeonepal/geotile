@@ -3,3 +3,4 @@ myst_parser
 nbsphinx
 numpydoc
 sphinx_toggleprompt
+pydata_sphinx_theme
