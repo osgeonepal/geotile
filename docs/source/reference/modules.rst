@@ -1,7 +1,7 @@
-API Reference
-=============
+geotile
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   geoTile
+   geotile
