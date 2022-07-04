@@ -132,9 +132,11 @@ class GeoTile:
                 tile_y: int
                     The size of the tile in y axis, Default value is 256
                 stride_x: int
-                    The stride of the x axis, Default value is 128
+                    The stride of the x axis, Default value is 128 (1/2 overalapping)
+                    If you want to ignore the overlap, keep it same as tile_x
                 stride_y: int
-                    The stride of the y axis, Default value is 128
+                    The stride of the y axis, Default value is 128 (1/2 overalapping)
+                    If you want to ignore the overlap, keep it same as tile_y
 
             Returns
             -------
@@ -146,7 +148,7 @@ class GeoTile:
                 >>> tiler = GeoTile('/path/to/raster/file.tif')
                 >>> tiler.generate_raster_tiles('/path/to/output/folder')
                     # save the specific bands with other than default size
-                >>> tiler.generate_raster_tiles('/path/to/output/folder', [3, 2, 1], tile_x=512, tile_y=512, stride_x=0, stride_y=0)
+                >>> tiler.generate_raster_tiles('/path/to/output/folder', [3, 2, 1], tile_x=512, tile_y=512, stride_x=512, stride_y=512)
         """
 
         self.tile_x = tile_x
@@ -167,14 +169,16 @@ class GeoTile:
                 col_off=col_off, row_off=row_off, width=256, height=256)
             transform = windows.transform(window, self.ds.transform)
             meta = self.ds.meta.copy()
+            nodata = meta['nodata']
 
             # update the meta data
             meta.update(
                 {"width": window.width, "height": window.height, "transform": transform})
 
             # if the output bands is not None, add all bands to the output dataset
+            # out_bands starts from i+1 because rasterio bands start from 1
             if out_bands is None:
-                out_bands = [i for i in range(0, self.ds.count())]
+                out_bands = [i+1 for i in range(0, self.ds.count)]
 
             else:
                 meta.update({"count": len(out_bands)})
@@ -186,13 +190,15 @@ class GeoTile:
             else:
                 dtype = self.ds.meta['dtype']
 
+            # tile name and path
             tile_name = 'tile_' + str(col_off) + '_' + \
                 str(row_off) + '.' + image_format
             tile_path = os.path.join(output_folder, tile_name)
+
             # save the tiles with new metadata
             with rio.open(tile_path, 'w', **meta) as outds:
                 outds.write(self.ds.read(
-                    out_bands, window=window).astype(dtype))
+                    out_bands, window=window, fill_value=nodata, boundless=True).astype(dtype))
 
     def mosaic_rasters(self, input_folder: str, out_path: str, image_format: Optional[str] = 'tif', **kwargs):
         """Mosaic the rasters inside the input folder
