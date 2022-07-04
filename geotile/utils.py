@@ -7,7 +7,7 @@ from rasterio.merge import merge
 
 
 # mosaic the tiles
-def mosaic_rasters(input_folder: str, output_file: str, image_format: Optional[str] = 'tif', **kwargs):
+def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 'tif', **kwargs):
     """Mosaic the rasters inside the input folder
 
         This method is used to merge the tiles into single file
