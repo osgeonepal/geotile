@@ -1,3 +1,7 @@
+[![Downloads](https://pepy.tech/badge/geotile)](https://pepy.tech/project/geotile)
+[![PyPI version](https://badge.fury.io/py/geotile.svg)](https://pypi.org/project/geotile/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/iamtekson/geotile/blob/master/LICENSE)
+
 # GeoTile
 
 GeoTile is an open-source python library for creating and manipulating the tiles of the raster dataset. The package will be very useful for managing the raster tiles which can be used for deep learning traing dataset.
@@ -23,10 +27,10 @@ from geotile import GeoTile
 gt = GeoTile(r"path/to/raster/data.tif")
 
 # to generate the tiles of raster
-gt.generate_raster_tiles(r'/path/to/output/folder', tile_x=512, tile_y=512, stride_x=0, stride_y=0)
+gt.generate_tiles(r'/path/to/output/folder', tile_x=256, tile_y=256, stride_x=256, stride_y=256)
 
 # to generate the raster mask from shapefile
-gt.generate_raster_mask_from_shapefile('/path/to/shapefile.shp', '/path/to/output/file.tif')
+gt.mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
 ```
 
 ### TO DO
