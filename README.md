@@ -1,3 +1,7 @@
+[![Downloads](https://pepy.tech/badge/geotile)](https://pepy.tech/project/geotile)
+[![PyPI version](https://badge.fury.io/py/geotile.svg)](https://pypi.org/project/geotile/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/iamtekson/geotile/blob/master/LICENSE)
+
 # GeoTile
 
 GeoTile is an open-source python library for creating and manipulating the tiles of the raster dataset. The package will be very useful for managing the raster tiles which can be used for deep learning traing dataset.
