@@ -23,7 +23,7 @@ from geotile import GeoTile
 gt = GeoTile(r"path/to/raster/data.tif")
 
 # to generate the tiles of raster
-gt.generate_tiles(r'/path/to/output/folder', tile_x=512, tile_y=512, stride_x=0, stride_y=0)
+gt.generate_tiles(r'/path/to/output/folder', tile_x=256, tile_y=256, stride_x=256, stride_y=256)
 
 # to generate the raster mask from shapefile
 gt.mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
