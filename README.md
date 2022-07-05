@@ -12,11 +12,13 @@ The complete documentation of this package is available here: https://geotile.re
 
 ## Installation
 
-If all of the dependencies ([rasterio](https://rasterio.readthedocs.io/en/latest/) and [geopandas](https://geopandas.org/en/stable/index.html)) are installed already, the library can be installed with pip as,
+The easy installation of `geotile` is by using `conda` environment,
 
 ```shell
-pip install geotile
+conda install -c conda-forge geotile
 ```
+
+If you want to install it for `pip`, check the documentation here: https://geotile.readthedocs.io/en/latest/pages/install.html
 
 ## Some basic examples
 
