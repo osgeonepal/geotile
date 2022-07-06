@@ -34,7 +34,7 @@ gt.generate_tiles(r'/path/to/output/folder', bands=[3,2,1], tile_x=512, tile_y=5
 To create the combined image with tiled images, the `mosaic` function will be useful,
 
 ```python
-from geoTile import mosaic
+from geotile import mosaic
 mosaic('/path/to/input/folder', '/path/to/output/file.tif')
 ```
 
