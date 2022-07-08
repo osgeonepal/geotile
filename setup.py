@@ -7,7 +7,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 about = dict()
 
-with open(os.path.join(HERE, "geoTile", "__version__.py"), "r") as f:
+with open(os.path.join(HERE, "geotile", "__version__.py"), "r") as f:
     exec(f.read(), about)
 
 with open("README.md", "r") as fh:
@@ -24,7 +24,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/iamtekson/geotile",
-    packages=["geoTile"],
+    packages=["geotile"],
     keywords=[
         "geotile",
         "geotiling",
