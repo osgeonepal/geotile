@@ -24,7 +24,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/iamtekson/geotile",
-    packages=["geoTile"],
+    packages=["geotile"],
     keywords=[
         "geotile",
         "geotiling",
