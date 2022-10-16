@@ -337,7 +337,7 @@ class GeoTile:
             Examples:
                 >>> from geotile import GeoTile
                 >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.reproject_raster('/path/to/output/file.tif', 'EPSG:4326')
+                >>> tiler.reprojection('/path/to/output/file.tif', 'EPSG:4326')
         """
         # reproject raster to project crs
         with rio.open(self.path) as src:
@@ -387,7 +387,7 @@ class GeoTile:
             Examples:
                 >>> from geotile import GeoTile
                 >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.resample_raster('/path/to/output/file.tif', 2)
+                >>> tiler.resample('/path/to/output/file.tif', 2)
         """
         # target dataset
         data = self.ds.read(

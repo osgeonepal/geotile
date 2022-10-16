@@ -28,7 +28,7 @@ Also, if you are working with multi-band dataset, it will help you to create the
 
 ```python
 # only band 3,2,1 will be included in the output tiles
-gt.generate_tiles(r'/path/to/output/folder', bands=[3,2,1], tile_x=512, tile_y=512, stride_x=0, stride_y=0)
+gt.generate_tiles(r'/path/to/output/folder', bands=[3,2,1], tile_x=512, tile_y=512, stride_x=512, stride_y=512)
 ```
 
 ## Merge tiles
@@ -56,6 +56,31 @@ gt.mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
 
 The output raster will have simillar metadata as the input raster.
 
+## Rasterization of shapefile
+
+To create the raster surface from the shapefile, you can do following thin. If value_col is None, the rasterization will be binary otherwise the rasterization will be the based on value of the column
+
+```python
+gt.rasterization(input_vector='path/to/shp.shp', out_path='path/to/output.tif' value_col=None)
+```
+
+> The generated raster will have same meta information as raster used in `GeoTile` class.
+
+## Close the raster file
+
+```python
+gt.close()
+```
+
 ## More functions
 
-**TO DO**
+Some of the other functionalities of this packages are as below,
+
+```python
+# reprojection of raster
+gt.reprojection(out_path='path/to/output.tif', out_crs='EPSG:4326', resampling_method='nearest')
+
+#resampling of raster
+gt.resample('/path/to/output/file.tif', upscale_factor=2, resampling_method='bilinear')
+```
+
