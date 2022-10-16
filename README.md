@@ -40,6 +40,12 @@ mosaic('/path/to/input/folder/tiles', output_file='path/to/output/file.tif')
 
 # to generate the raster mask from shapefile
 gt.mask('/path/to/shapefile.shp', '/path/to/output/file.tif')
+
+# to rasterize the shapefile based on column value,
+gt.rasterization(input_vector='path/to/shp.shp', out_path='path/to/output.tif' value_col="value_col")
+
+# to close the file
+gt.close()
 ```
 
 ### TO DO
