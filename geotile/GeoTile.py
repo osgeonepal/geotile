@@ -101,8 +101,8 @@ class GeoTile:
         self.stride_y = stride_y
 
         # offset x and y values calculation
-        X = [x for x in range(0, self.ds.width, stride_x)]
-        Y = [y for y in range(0, self.ds.height, stride_y)]
+        X = [x for x in range(0, self.width, stride_x)]
+        Y = [y for y in range(0, self.height, stride_y)]
         offsets = list(itertools.product(X, Y))
         return offsets
 

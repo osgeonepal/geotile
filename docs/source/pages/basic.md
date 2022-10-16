@@ -20,12 +20,14 @@ gt.generate_tiles(r'/path/to/output/folder')
 By default, the above function will create the tiles having square shape of `256` and overlapping of `128`. But you can overwrite the shape as your requirements,
 
 ```python
-gt.generate_tiles(r'/path/to/output/folder', tile_x=512, tile_y=512, stride_x=0, stride_y=0)
+# to generate the tiles having no overlapping
+gt.generate_tiles(r'/path/to/output/folder', tile_x=512, tile_y=512, stride_x=512, stride_y=512)
 ```
 
 Also, if you are working with multi-band dataset, it will help you to create the tiles with only specific bands as well,
 
 ```python
+# only band 3,2,1 will be included in the output tiles
 gt.generate_tiles(r'/path/to/output/folder', bands=[3,2,1], tile_x=512, tile_y=512, stride_x=0, stride_y=0)
 ```
 
