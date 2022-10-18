@@ -172,7 +172,7 @@ class GeoTile:
         # iterate through the offsets
         for col_off, row_off in offsets:
             window = windows.Window(
-                col_off=col_off, row_off=row_off, width=256, height=256)
+                col_off=col_off, row_off=row_off, width=self.tile_x, height=self.tile_y)
             transform = windows.transform(window, self.ds.transform)
             meta = self.ds.meta.copy()
             nodata = meta['nodata']
