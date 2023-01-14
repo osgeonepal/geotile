@@ -64,7 +64,7 @@ def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 't
 
 
 # vectorize the tiles
-def vectorize(input_raster: str, output_file:str, band (Optional: str) = 1, mask (Optional: str) = None):
+def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask: Optional[str] = None):
     """Vectorize the raster
 
         This method is used to vectorize the raster
