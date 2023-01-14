@@ -48,6 +48,3 @@ gt.rasterization(input_vector='path/to/shp.shp', out_path='path/to/output.tif' v
 gt.close()
 ```
 
-### TO DO
-
-- Vectorize raster data

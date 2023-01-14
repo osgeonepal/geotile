@@ -61,3 +61,44 @@ def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 't
         outds.write(mosaic)
 
     return output_file
+
+
+# vectorize the tiles
+def vectorize(input_raster: str, output_file:str, band (Optional: str) = 1, mask (Optional: str) = None):
+    """Vectorize the raster
+
+        This method is used to vectorize the raster
+
+        Parameters
+        ----------
+            input_raster: str, python path 
+                Path to the input raster
+            output_file: str, python path
+                Path to the output file
+            band: int
+                The band to be vectorized
+
+        Returns
+        -------
+            output_file
+                Save the vectorized raster as a output_file. Returns the output_file path
+
+        Examples
+        --------
+            >>> from geotile import vectorize
+            >>> vectorize('/path/to/input/raster.tif', '/path/to/output/file.shp')
+    """
+
+    # Open the raster
+    with rio.open(input_raster) as src:
+        raster = src.read(band)
+
+    # Vectorize the raster
+    shapes = rio.features.shapes(raster, transform=src.transform, mask=mask)
+
+    # Save the vectorized raster
+    with fiona.open(output_file, 'w', crs=src.crs, driver='ESRI Shapefile', schema={'geometry': 'Polygon', 'properties': [('value', 'int')]}) as dst:
+        for geom, value in shapes:
+            dst.write({'geometry': geom, 'properties': {'value': value}})
+
+    return output_file
