@@ -160,7 +160,7 @@ class GeoTile:
         self.stride_y = stride_y
 
         if image_format is None:
-            image_format = pathlib.Path(self.path).suffix
+            image_format = pathlib.Path(self.path).suffix[1:]
 
         # create the output folder if it doesn't exist
         if not os.path.exists(output_folder):
