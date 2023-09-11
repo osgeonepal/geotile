@@ -37,6 +37,11 @@ Useful links
 - `Source Repository (GitHub) <https://github.com/iamtekson/geotile>`_ 
 - `Issues & Ideas <https://github.com/iamtekson/geotile/issues>`_ 
 
+.. automodule:: geotile
+   :members:
+   :noindex:
+
+
 Indices and tables
 ==================
 
