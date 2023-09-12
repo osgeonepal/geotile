@@ -268,25 +268,10 @@ class GeoTile:
                 src, df["geometry"], crop=crop, invert=invert, **kwargs)
             out_meta = src.meta.copy()
 
-        # if the raster is 3D, take the first band
-        if out_image.ndim == 3:
-            out_image = out_image[0]
-            
-            # create mask of either 0 or 1
-            out_image = np.where(out_image == 0, 0, 1)
-            
-            # expand the dimension to 3D
-            out_image = np.expand_dims(out_image, axis=0)
-
-        # if the raster is 2D, expand the dimension to 3D
-        elif out_image.ndim == 2:
-            out_image = np.expand_dims(out_image, axis=0)
-
         # update the metadata
         out_meta.update({
             "height": out_image.shape[1],
             "width": out_image.shape[2],
-            'count': 1,
             "transform": out_transform})
 
         # write the output raster
