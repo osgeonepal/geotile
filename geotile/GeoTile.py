@@ -1,10 +1,10 @@
 # inbuilt libraries
 import os
 import itertools
-import glob
 from typing import Optional
 import pathlib
 
+# numpy library
 import numpy as np
 
 # rasterio library
@@ -350,7 +350,7 @@ class GeoTile:
                 outds.write(wd.astype(dtype))
 
     def normalize_tiles(self):
-        """Normalize the tiles
+        """Normalize the tiles between 0 and 1 (MinMaxScaler)
 
             Returns
             -------
@@ -372,8 +372,9 @@ class GeoTile:
         max_values = np.max(self.window_data, axis=(0, 2, 3))
         min_values = np.min(self.window_data, axis=(0, 2, 3))
 
-        # normalize the tiles and update the window_data
-        self.window_data = (self.window_data - min_values) / (max_values - min_values)
+        # Normalize the tiles and update the window_data for each channel independently
+        for channel in range(self.window_data.shape[1]):
+            self.window_data[:, channel, :, :] = (self.window_data[:, channel, :, :] - min_values[channel]) / (max_values[channel] - min_values[channel])
     
     def save_numpys(self, file_name: str, dtype: Optional[str] = None):
         """Save the tiles to the output folder
