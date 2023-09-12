@@ -105,7 +105,24 @@ class GeoTile:
         Y = [y for y in range(0, self.height, stride_y)]
         offsets = list(itertools.product(X, Y))
         return offsets
+    
+    
+    def tile_info(self):
+        """Get the information of the tiles
 
+            Returns
+            -------
+                dict: (tile_x, tile_y, stride_x, stride_y)
+
+            Examples
+            --------
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
+                >>> tiler.tile_info()
+                    {'tile_x': 256, 'tile_y': 256, 'stride_x': 128, 'stride_y': 128}
+        """
+        return({'tile_x': self.tile_x, 'tile_y': self.tile_y, 'stride_x': self.stride_x, 'stride_y': self.stride_y})
+    
     def generate_tiles(
             self,
             output_folder: str,
