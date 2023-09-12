@@ -349,6 +349,60 @@ class GeoTile:
             with rio.open(tile_path, 'w', **meta) as outds:
                 outds.write(wd.astype(dtype))
 
+    def normalize_tiles(self):
+        """Normalize the tiles
+
+            Returns
+            -------
+                None: Normalize the tiles. The normalized tiles will be stored in the class
+
+            Examples
+            --------
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
+                >>> tiler.normalize_tiles()
+        """
+        # normalize the tiles
+        # if self.window_data is list, convert it to numpy array
+        if isinstance(self.window_data, list):
+            self.window_data = np.array(self.window_data)
+
+        # find max and min values in whole tiles on each channel
+        # my windows_data shape: (n, band, tile_y, tile_x)
+        max_values = np.max(self.window_data, axis=(0, 2, 3))
+        min_values = np.min(self.window_data, axis=(0, 2, 3))
+
+        # normalize the tiles and update the window_data
+        self.window_data = (self.window_data - min_values) / (max_values - min_values)
+    
+    def save_numpys(self, file_name: str, dtype: Optional[str] = None):
+        """Save the tiles to the output folder
+
+            Parameters
+            ----------
+                file_name : str
+                    Path or name of the output numpy file
+                    
+            Returns
+            -------
+                None: save the tiles to the output folder
+
+            Examples
+            --------
+                >>> from geotile import GeoTile
+                >>> tiler = GeoTile('/path/to/raster/file.tif')
+                >>> tiler.save_numpys('/folder/to/output/file.npy')
+        """
+        #check if the file name path exists or not, if not, create the folder
+        if not os.path.exists(os.path.dirname(file_name)):
+            os.makedirs(os.path.dirname(file_name))
+
+        # if self.window_data is list, convert it to numpy array
+        if isinstance(self.window_data, list):
+            self.window_data = np.array(self.window_data)
+
+        # save the numpy file
+        np.save(file_name, self.window_data.astype(dtype))
 
     def mask(self, input_vector: str, out_path: str, crop=False, invert=False, **kwargs):
         """Generate a mask raster from a vector
