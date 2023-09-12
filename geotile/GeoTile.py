@@ -138,8 +138,8 @@ class GeoTile:
             Examples
             --------
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.shuffle_tiles()
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.shuffle_tiles()
         """
         # check if random_state is not None
         if random_state is not None:
@@ -164,8 +164,8 @@ class GeoTile:
             Examples
             --------
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.tile_info()
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.tile_info()
                     {'tile_x': 256, 'tile_y': 256, 'stride_x': 128, 'stride_y': 128}
         """
         return({'tile_x': self.tile_x, 'tile_y': self.tile_y, 'stride_x': self.stride_x, 'stride_y': self.stride_y})
@@ -215,10 +215,10 @@ class GeoTile:
             Examples
             --------
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.generate_raster_tiles('/path/to/output/folder')
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.generate_raster_tiles('/path/to/output/folder')
                     # save the specific bands with other than default size
-                >>> tiler.generate_raster_tiles('/path/to/output/folder', [3, 2, 1], tile_x=512, tile_y=512, stride_x=512, stride_y=512)
+                >>> gt.generate_raster_tiles('/path/to/output/folder', [3, 2, 1], tile_x=512, tile_y=512, stride_x=512, stride_y=512)
         """
 
         self.tile_x = tile_x
@@ -310,8 +310,8 @@ class GeoTile:
             Examples
             --------
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.save_tiles('/path/to/output/folder')
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.save_tiles('/path/to/output/folder')
         """
         # create the output folder if it doesn't exist
         if not os.path.exists(output_folder):
@@ -359,8 +359,8 @@ class GeoTile:
             Examples
             --------
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.normalize_tiles()
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.normalize_tiles()
         """
         # normalize the tiles
         # if self.window_data is list, convert it to numpy array
@@ -390,8 +390,8 @@ class GeoTile:
             Examples
             --------
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.save_numpys('/folder/to/output/file.npy')
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.save_numpys('/folder/to/output/file.npy')
         """
         #check if the file name path exists or not, if not, create the folder
         if not os.path.exists(os.path.dirname(file_name)):
@@ -434,8 +434,8 @@ class GeoTile:
 
             Examples:
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.generate_raster_mask('/path/to/vector.shp', '/path/to/output/file.tif')
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.generate_raster_mask('/path/to/vector.shp', '/path/to/output/file.tif')
         """
 
         # open the input vector
@@ -488,8 +488,8 @@ class GeoTile:
 
             Examples:
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.rasterize_vector('/path/to/vector.shp', '/path/to/output/file.tif')
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.rasterize_vector('/path/to/vector.shp', '/path/to/output/file.tif')
         """
 
         # open the input vector
@@ -537,8 +537,8 @@ class GeoTile:
 
             Examples:
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.reprojection('/path/to/output/file.tif', 'EPSG:4326')
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.reprojection('/path/to/output/file.tif', 'EPSG:4326')
         """
         # reproject raster to project crs
         with rio.open(self.path) as src:
@@ -587,8 +587,8 @@ class GeoTile:
 
             Examples:
                 >>> from geotile import GeoTile
-                >>> tiler = GeoTile('/path/to/raster/file.tif')
-                >>> tiler.resample('/path/to/output/file.tif', 2)
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.resample('/path/to/output/file.tif', 2)
         """
         # target dataset
         data = self.ds.read(
