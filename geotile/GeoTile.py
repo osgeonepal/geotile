@@ -385,7 +385,7 @@ class GeoTile:
                     
             Returns
             -------
-                None: save the tiles to the output folder
+                None: save the tiles to the output folder, the shape of the numpy file will be (n, tile_x, tile_y, band)
 
             Examples
             --------
@@ -401,8 +401,11 @@ class GeoTile:
         if isinstance(self.window_data, list):
             self.window_data = np.array(self.window_data)
 
+        # change axis to (n, tile_x, tile_y, band)
+        data = np.moveaxis(self.window_data, 1, -1)
+
         # save the numpy file
-        np.save(file_name, self.window_data.astype(dtype))
+        np.save(file_name, data.astype(dtype))
 
     def mask(self, input_vector: str, out_path: str, crop=False, invert=False, **kwargs):
         """Generate a mask raster from a vector
