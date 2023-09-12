@@ -5,3 +5,5 @@ numpydoc
 sphinx_toggleprompt
 sphinx_rtd_theme
 pydata_sphinx_theme
+rasterio
+geopandas
