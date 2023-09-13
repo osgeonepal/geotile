@@ -294,12 +294,12 @@ class GeoTile:
                     outds.write(self.ds.read(
                         out_bands, window=window, fill_value=nodata, boundless=True).astype(dtype))
                 
-            else:
-                # convert list to numpy array
-                self.window_data = np.array(self.window_data)
+        if not save_tiles:
+            # convert list to numpy array
+            self.window_data = np.array(self.window_data)
 
-                # move axis to (n, tile_y, tile_x, band)
-                self.window_data = np.moveaxis(self.window_data, 1, -1)
+            # move axis to (n, tile_y, tile_x, band)
+            self.window_data = np.moveaxis(self.window_data, 1, -1)
 
     def save_tiles(self, output_folder: str, image_format: Optional[str] = None, dtype: Optional[str] = None):
         """Save the tiles to the output folder
@@ -388,8 +388,8 @@ class GeoTile:
         min_values = np.min(self.window_data, axis=(0, 1, 2))
         
         # Normalize the tiles and update the window_data for each channel independently
-        for channel in range(self.window_data.shape[1]):
-            self.window_data[:, channel, :, :] = (self.window_data[:, channel, :, :] - min_values[channel]) / (max_values[channel] - min_values[channel])
+        for channel in range(self.window_data.shape[-1]):
+            self.window_data[:, :, :, channel] = (self.window_data[:, :, :, channel] - min_values[channel]) / (max_values[channel] - min_values[channel])
     
     def convert_nan_to_zero(self):
         """Convert nan values to zero
