@@ -439,11 +439,8 @@ class GeoTile:
         if isinstance(self.tile_data, list):
             self.tile_data = np.array(self.tile_data)
 
-        # change axis to (n, tile_x, tile_y, band)
-        data = np.moveaxis(self.tile_data, 1, -1)
-
         # save the numpy file
-        np.save(file_name, data.astype(dtype))
+        np.save(file_name, self.tile_data.astype(dtype))
 
     def mask(self, input_vector: str, out_path: str, crop=False, invert=False, **kwargs):
         """Generate a mask raster from a vector
