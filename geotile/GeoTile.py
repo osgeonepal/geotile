@@ -173,6 +173,8 @@ class GeoTile:
     def generate_tiles(
             self,
             output_folder: Optional[str] = 'tiles',
+            suffix: Optional[str] = None,
+            prefix: Optional[str] = None,
             save_tiles: Optional[bool] = True,
             out_bands: Optional[list] = None,
             image_format: Optional[str] = None,
@@ -191,6 +193,10 @@ class GeoTile:
                     Path to the output folder
                 save_tiles : bool
                     If True, the tiles will be saved to the output folder else the tiles will be stored in the class
+                suffix : str
+                    The suffix of the tile name (eg. _img)
+                prefix : str
+                    The prefix of the tile name (eg. img_)
                 out_bands : list
                     The bands to save (eg. [3, 2, 1]), if None, the output bands will be same as the input raster bands
                 image_format : str
@@ -216,7 +222,7 @@ class GeoTile:
             --------
                 >>> from geotile import GeoTile
                 >>> gt = GeoTile('/path/to/raster/file.tif')
-                >>> gt.generate_raster_tiles('/path/to/output/folder')
+                >>> gt.generate_raster_tiles('/path/to/output/folder', prefix='img_')
                     # save the specific bands with other than default size
                 >>> gt.generate_raster_tiles('/path/to/output/folder', [3, 2, 1], tile_x=512, tile_y=512, stride_x=512, stride_y=512)
         """
@@ -225,9 +231,6 @@ class GeoTile:
         self.tile_y = tile_y
         self.stride_x = stride_x
         self.stride_y = stride_y
-
-        if image_format is None:
-            image_format = pathlib.Path(self.path).suffix[1:]
 
         # create the output folder if it doesn't exist
         if not os.path.exists(output_folder):
@@ -243,7 +246,7 @@ class GeoTile:
         self.window_transform = []
 
         # iterate through the offsets and save the tiles
-        for col_off, row_off in self.offsets:
+        for i, (col_off, row_off) in enumerate(self.offsets):
             window = windows.Window(
                 col_off=col_off, row_off=row_off, width=self.tile_x, height=self.tile_y)
             transform = windows.transform(window, self.ds.transform)
@@ -280,13 +283,22 @@ class GeoTile:
                 dtype = self.ds.meta['dtype']
 
             if save_tiles:
+
+                # check if image_format is None
+                image_format = image_format or pathlib.Path(self.path).suffix
+
                 # create the output folder if it doesn't exist
                 if not os.path.exists(output_folder):
                     os.makedirs(output_folder)
 
-                # tile name and path
-                tile_name = 'tile_' + str(col_off) + '_' + \
-                    str(row_off) + '.' + image_format
+                # Set default values for suffix and prefix if they are None
+                suffix = suffix or ''
+                prefix = prefix or ''
+
+                # Construct the tile name and path
+                tile_name = (f'{prefix}{str(i)}{suffix}{image_format}' if suffix or prefix else
+                        f'tile_{col_off}_{row_off}{image_format}')
+                
                 tile_path = os.path.join(output_folder, tile_name)
 
                 # save the tiles with new metadata
@@ -298,16 +310,30 @@ class GeoTile:
             # convert list to numpy array
             self.tile_data = np.array(self.tile_data)
 
+            # dtype conversion
+            self.tile_data = self.tile_data.astype(dtype)
+
             # move axis to (n, tile_y, tile_x, band)
             self.tile_data = np.moveaxis(self.tile_data, 1, -1)
 
-    def save_tiles(self, output_folder: str, image_format: Optional[str] = None, dtype: Optional[str] = None):
+    def save_tiles(
+            self, 
+            output_folder: str, 
+            prefix: Optional[str] = None, 
+            suffix: Optional[str] = None, 
+            image_format: Optional[str] = None, 
+            dtype: Optional[str] = None
+        ):
         """Save the tiles to the output folder
 
             Parameters
             ----------
                 output_folder : str
                     Path to the output folder
+                prefix : str
+                    The prefix of the tile name (eg. img_)
+                suffix : str
+                    The suffix of the tile name (eg. _img)
                 image_format : str
                     The image format (eg. tif), if None, the image format will be the same as the input raster format (eg. tif)
 
@@ -322,7 +348,7 @@ class GeoTile:
             --------
                 >>> from geotile import GeoTile
                 >>> gt = GeoTile('/path/to/raster/file.tif')
-                >>> gt.save_tiles('/path/to/output/folder')
+                >>> gt.save_tiles('/path/to/output/folder', prefix='img_')
         """
         # create the output folder if it doesn't exist
         if not os.path.exists(output_folder):
@@ -337,8 +363,11 @@ class GeoTile:
         })
 
         # check if image_format is None
-        if image_format is None:
-            image_format = pathlib.Path(self.path).suffix[1:]
+        image_format = image_format or pathlib.Path(self.path).suffix
+
+        # Set default values for suffix and prefix if they are None
+        suffix = suffix or ''
+        prefix = prefix or ''
 
         # if data_type, update the meta
         if dtype:
@@ -351,9 +380,10 @@ class GeoTile:
             # update meta data with transform
             meta.update({"transform": tuple(wt)})
 
-            # tile name and path
-            tile_name = 'tile_' + str(col_off) + '_' + \
-                str(row_off) + '.' + image_format
+            # Construct the tile name and path
+            tile_name = (f'{prefix}{str(i)}{suffix}{image_format}' if suffix or prefix else
+                    f'tile_{col_off}_{row_off}{image_format}')
+            
             tile_path = os.path.join(output_folder, tile_name)
 
             # move axis to (band, tile_y, tile_x)
