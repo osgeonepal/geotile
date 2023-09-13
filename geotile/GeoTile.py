@@ -359,6 +359,9 @@ class GeoTile:
             # move axis to (band, tile_y, tile_x)
             wd = np.moveaxis(wd, -1, 0)
 
+            # update the meta with number of bands 
+            meta.update({"count": wd.shape[0]})
+
             # save the tiles with new metadata
             with rio.open(tile_path, 'w', **meta) as outds:
                 outds.write(wd.astype(dtype))
