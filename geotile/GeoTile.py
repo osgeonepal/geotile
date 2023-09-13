@@ -123,7 +123,7 @@ class GeoTile:
         return Affine(a, b, c, d, e, f)
 
     
-    def suffel_tiles(self, random_state: Optional[int] = None):
+    def shuffle_tiles(self, random_state: Optional[int] = None):
         """Shuffle the tiles
 
             Parameters
@@ -445,7 +445,7 @@ class GeoTile:
         # convert nan values to zero
         self.tile_data = np.nan_to_num(self.tile_data)
     
-    def save_numpys(self, file_name: str, dtype: Optional[str] = None):
+    def save_numpy(self, file_name: str, dtype: Optional[str] = None):
         """Save the tiles to the output folder
 
             Parameters
