@@ -376,6 +376,26 @@ class GeoTile:
         for channel in range(self.window_data.shape[1]):
             self.window_data[:, channel, :, :] = (self.window_data[:, channel, :, :] - min_values[channel]) / (max_values[channel] - min_values[channel])
     
+    def convert_nan_to_zero(self):
+        """Convert nan values to zero
+
+            Returns
+            -------
+                None: Convert nan values to zero. The converted tiles will be stored in the class
+
+            Examples
+            --------
+                >>> from geotile import GeoTile
+                >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.convert_nan_to_zero()
+        """
+        # if self.window_data is list, convert it to numpy array
+        if isinstance(self.window_data, list):
+            self.window_data = np.array(self.window_data)
+
+        # convert nan values to zero
+        self.window_data = np.nan_to_num(self.window_data)
+    
     def save_numpys(self, file_name: str, dtype: Optional[str] = None):
         """Save the tiles to the output folder
 
