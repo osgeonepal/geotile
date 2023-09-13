@@ -146,12 +146,12 @@ class GeoTile:
             self.random_state = random_state
             np.random.seed(self.random_state)
 
-        assert len(self.offsets) == len(self.window_data) == len(self.window_transform), "The number of offsets and window data should be same"
+        assert len(self.offsets) == len(self.tile_data) == len(self.window_transform), "The number of offsets and window data should be same"
 
         # shuffle the offsets and window data
         p = np.random.permutation(len(self.offsets))
         self.offsets = np.array(self.offsets)[p]
-        self.window_data = np.array(self.window_data)[p]
+        self.tile_data = np.array(self.tile_data)[p]
         self.window_transform = np.array(self.window_transform)[p]
 
     def tile_info(self):
@@ -237,7 +237,7 @@ class GeoTile:
         self._calculate_offset(self.stride_x, self.stride_y)
 
         #store all the windows data as a list, windows shape: (band, tile_y, tile_x)
-        self.window_data = []
+        self.tile_data = []
 
         # store all the transform data as a list
         self.window_transform = []
@@ -269,8 +269,8 @@ class GeoTile:
                 meta.update({"count": len(out_bands)})
 
             # read the window data and append to the list
-            single_window_data = self.ds.read(out_bands, window=window, fill_value=nodata, boundless=True)
-            self.window_data.append(single_window_data)
+            single_tile_data = self.ds.read(out_bands, window=window, fill_value=nodata, boundless=True)
+            self.tile_data.append(single_tile_data)
 
             # if data_type, update the meta
             if dtype:
@@ -296,10 +296,10 @@ class GeoTile:
                 
         if not save_tiles:
             # convert list to numpy array
-            self.window_data = np.array(self.window_data)
+            self.tile_data = np.array(self.tile_data)
 
             # move axis to (n, tile_y, tile_x, band)
-            self.window_data = np.moveaxis(self.window_data, 1, -1)
+            self.tile_data = np.moveaxis(self.tile_data, 1, -1)
 
     def save_tiles(self, output_folder: str, image_format: Optional[str] = None, dtype: Optional[str] = None):
         """Save the tiles to the output folder
@@ -346,7 +346,7 @@ class GeoTile:
             dtype=dtype
 
         # iterate through the offsets and windows_data and save the tiles
-        for i, ((col_off, row_off), wd, wt) in enumerate(zip(self.offsets, self.window_data, self.window_transform)):
+        for i, ((col_off, row_off), wd, wt) in enumerate(zip(self.offsets, self.tile_data, self.window_transform)):
             
             # update meta data with transform
             meta.update({"transform": tuple(wt)})
@@ -378,18 +378,18 @@ class GeoTile:
                 >>> gt.normalize_tiles()
         """
         # normalize the tiles
-        # if self.window_data is list, convert it to numpy array
-        if isinstance(self.window_data, list):
-            self.window_data = np.array(self.window_data)
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
 
         # find max and min values in whole tiles on each channel
         # my windows_data shape: (n, tile_y, tile_x, band)
-        max_values = np.max(self.window_data, axis=(0, 1, 2))
-        min_values = np.min(self.window_data, axis=(0, 1, 2))
+        max_values = np.max(self.tile_data, axis=(0, 1, 2))
+        min_values = np.min(self.tile_data, axis=(0, 1, 2))
         
-        # Normalize the tiles and update the window_data for each channel independently
-        for channel in range(self.window_data.shape[-1]):
-            self.window_data[:, :, :, channel] = (self.window_data[:, :, :, channel] - min_values[channel]) / (max_values[channel] - min_values[channel])
+        # Normalize the tiles and update the tile_data for each channel independently
+        for channel in range(self.tile_data.shape[-1]):
+            self.tile_data[:, :, :, channel] = (self.tile_data[:, :, :, channel] - min_values[channel]) / (max_values[channel] - min_values[channel])
     
     def convert_nan_to_zero(self):
         """Convert nan values to zero
@@ -405,12 +405,12 @@ class GeoTile:
                 >>> gt.generate_raster_tiles(save_tiles=False)
                 >>> gt.convert_nan_to_zero()
         """
-        # if self.window_data is list, convert it to numpy array
-        if isinstance(self.window_data, list):
-            self.window_data = np.array(self.window_data)
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
 
         # convert nan values to zero
-        self.window_data = np.nan_to_num(self.window_data)
+        self.tile_data = np.nan_to_num(self.tile_data)
     
     def save_numpys(self, file_name: str, dtype: Optional[str] = None):
         """Save the tiles to the output folder
@@ -435,12 +435,12 @@ class GeoTile:
         if not os.path.exists(os.path.dirname(file_name)):
             os.makedirs(os.path.dirname(file_name))
 
-        # if self.window_data is list, convert it to numpy array
-        if isinstance(self.window_data, list):
-            self.window_data = np.array(self.window_data)
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
 
         # change axis to (n, tile_x, tile_y, band)
-        data = np.moveaxis(self.window_data, 1, -1)
+        data = np.moveaxis(self.tile_data, 1, -1)
 
         # save the numpy file
         np.save(file_name, data.astype(dtype))
