@@ -172,7 +172,7 @@ class GeoTile:
     
     def generate_tiles(
             self,
-            output_folder: str,
+            output_folder: Optional[str] = 'tiles',
             save_tiles: Optional[bool] = True,
             out_bands: Optional[list] = None,
             image_format: Optional[str] = None,
@@ -279,16 +279,27 @@ class GeoTile:
             else:
                 dtype = self.ds.meta['dtype']
 
-            # tile name and path
-            tile_name = 'tile_' + str(col_off) + '_' + \
-                str(row_off) + '.' + image_format
-            tile_path = os.path.join(output_folder, tile_name)
-
             if save_tiles:
+                # create the output folder if it doesn't exist
+                if not os.path.exists(output_folder):
+                    os.makedirs(output_folder)
+
+                # tile name and path
+                tile_name = 'tile_' + str(col_off) + '_' + \
+                    str(row_off) + '.' + image_format
+                tile_path = os.path.join(output_folder, tile_name)
+
                 # save the tiles with new metadata
                 with rio.open(tile_path, 'w', **meta) as outds:
                     outds.write(self.ds.read(
                         out_bands, window=window, fill_value=nodata, boundless=True).astype(dtype))
+                
+            else:
+                # convert list to numpy array
+                self.window_data = np.array(self.window_data)
+
+                # move axis to (n, tile_y, tile_x, band)
+                self.window_data = np.moveaxis(self.window_data, 1, -1)
 
     def save_tiles(self, output_folder: str, image_format: Optional[str] = None, dtype: Optional[str] = None):
         """Save the tiles to the output folder
@@ -345,6 +356,9 @@ class GeoTile:
                 str(row_off) + '.' + image_format
             tile_path = os.path.join(output_folder, tile_name)
 
+            # move axis to (band, tile_y, tile_x)
+            wd = np.moveaxis(wd, -1, 0)
+
             # save the tiles with new metadata
             with rio.open(tile_path, 'w', **meta) as outds:
                 outds.write(wd.astype(dtype))
@@ -360,6 +374,7 @@ class GeoTile:
             --------
                 >>> from geotile import GeoTile
                 >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.generate_raster_tiles(save_tiles=False)
                 >>> gt.normalize_tiles()
         """
         # normalize the tiles
@@ -368,10 +383,10 @@ class GeoTile:
             self.window_data = np.array(self.window_data)
 
         # find max and min values in whole tiles on each channel
-        # my windows_data shape: (n, band, tile_y, tile_x)
-        max_values = np.max(self.window_data, axis=(0, 2, 3))
-        min_values = np.min(self.window_data, axis=(0, 2, 3))
-
+        # my windows_data shape: (n, tile_y, tile_x, band)
+        max_values = np.max(self.window_data, axis=(0, 1, 2))
+        min_values = np.min(self.window_data, axis=(0, 1, 2))
+        
         # Normalize the tiles and update the window_data for each channel independently
         for channel in range(self.window_data.shape[1]):
             self.window_data[:, channel, :, :] = (self.window_data[:, channel, :, :] - min_values[channel]) / (max_values[channel] - min_values[channel])
@@ -387,6 +402,7 @@ class GeoTile:
             --------
                 >>> from geotile import GeoTile
                 >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.generate_raster_tiles(save_tiles=False)
                 >>> gt.convert_nan_to_zero()
         """
         # if self.window_data is list, convert it to numpy array
@@ -412,6 +428,7 @@ class GeoTile:
             --------
                 >>> from geotile import GeoTile
                 >>> gt = GeoTile('/path/to/raster/file.tif')
+                >>> gt.generate_raster_tiles(save_tiles=False)
                 >>> gt.save_numpys('/folder/to/output/file.npy')
         """
         #check if the file name path exists or not, if not, create the folder
