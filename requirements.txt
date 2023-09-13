@@ -1,0 +1,5 @@
+fiona
+geopandas
+gdal
+numpy
+rasterio
