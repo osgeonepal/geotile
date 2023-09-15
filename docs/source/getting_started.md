@@ -1,16 +1,5 @@
 # Getting Started
 
-```{toctree}
----
-maxdepth: 2
-caption: Getting Started
-hidden:
----
-Installation <pages/install>
-Basic functions <pages/basic>
-Advance functions <pages/advance>
-```
-
 ## Installation
 
 GeoTile is written in pure python but some dependencies are written in C (Gdal, GEOS). These dependencies are not included in the source distribution of GeoTile. To install GeoTile, you need to install the dependencies first.
