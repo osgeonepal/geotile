@@ -15,6 +15,9 @@ GeoTiles Documentation
    Home <self>
    About <about>
    Getting Started <getting_started>
+   Installation <pages/install>
+   Basic Use Case <pages/basic>
+   Advance Use Case in Deep Learning <pages/advance>
    API reference <reference/modules>
    Change Log <pages/changelog>
    License <license>
