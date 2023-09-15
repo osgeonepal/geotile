@@ -301,10 +301,25 @@ class GeoTile:
                 
                 tile_path = os.path.join(output_folder, tile_name)
 
+                # tile georeference data to reconstruct spatial location from output inference bboxes
+                geo_reference_tile_worldfile = (f'{prefix}{str(i)}{suffix}.txt' if suffix or prefix else
+                        f'tile_{col_off}_{row_off}.txt')
+                
+                geo_reference_tile_worldfile_path = os.path.join(output_folder, geo_reference_tile_worldfile)
+    
+                crs = meta["crs"]
+                crs = crs.to_proj4()
+
                 # save the tiles with new metadata
                 with rio.open(tile_path, 'w', **meta) as outds:
                     outds.write(self.ds.read(
                         out_bands, window=window, fill_value=nodata, boundless=True).astype(dtype))
+
+                 # raster affine transform information
+                with open(geo_reference_tile_worldfile_path, "w") as f:
+                    f.write(str(transform.to_gdal()))
+                    f.write("\n")
+                    f.write(crs)
                 
         if not save_tiles:
             # convert list to numpy array
