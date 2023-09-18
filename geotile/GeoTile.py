@@ -176,6 +176,7 @@ class GeoTile:
             suffix: Optional[str] = None,
             prefix: Optional[str] = None,
             save_tiles: Optional[bool] = True,
+            save_transform: Optional[bool] = False,
             out_bands: Optional[list] = None,
             image_format: Optional[str] = None,
             dtype: Optional[str] = None,
@@ -193,6 +194,8 @@ class GeoTile:
                     Path to the output folder
                 save_tiles : bool
                     If True, the tiles will be saved to the output folder else the tiles will be stored in the class
+                save_transform : bool
+                    If True, the transform will be saved to the output folder in txt file else it will only generate the tiles
                 suffix : str
                     The suffix of the tile name (eg. _img)
                 prefix : str
@@ -301,25 +304,27 @@ class GeoTile:
                 
                 tile_path = os.path.join(output_folder, tile_name)
 
-                # tile georeference data to reconstruct spatial location from output inference bboxes
-                geo_reference_tile_worldfile = (f'{prefix}{str(i)}{suffix}.txt' if suffix or prefix else
-                        f'tile_{col_off}_{row_off}.txt')
-                
-                geo_reference_tile_worldfile_path = os.path.join(output_folder, geo_reference_tile_worldfile)
-    
-                crs = meta["crs"]
-                crs = crs.to_proj4()
+                if save_transform:
+                    # tile georeference data to reconstruct spatial location from output inference bboxes
+                    geo_reference_tile_worldfile = (f'{prefix}{str(i)}{suffix}.txt' if suffix or prefix else
+                            f'tile_{col_off}_{row_off}.txt')
+                    
+                    geo_reference_tile_worldfile_path = os.path.join(output_folder, geo_reference_tile_worldfile)
+        
+                    crs = meta["crs"]
+                    crs = crs.to_proj4()
+
+                    # raster affine transform information
+                    with open(geo_reference_tile_worldfile_path, "w") as f:
+                        f.write(str(transform.to_gdal()))
+                        f.write("\n")
+                        f.write(crs)
 
                 # save the tiles with new metadata
                 with rio.open(tile_path, 'w', **meta) as outds:
                     outds.write(self.ds.read(
                         out_bands, window=window, fill_value=nodata, boundless=True).astype(dtype))
 
-                 # raster affine transform information
-                with open(geo_reference_tile_worldfile_path, "w") as f:
-                    f.write(str(transform.to_gdal()))
-                    f.write("\n")
-                    f.write(crs)
                 
         if not save_tiles:
             # convert list to numpy array
