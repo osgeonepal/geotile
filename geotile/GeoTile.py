@@ -638,7 +638,8 @@ class GeoTile:
         input_vector: str,
         out_path: str,
         value_col=None,
-        no_data_val: Optional[int] = None,
+        no_data: Optional[int] = None,
+        fill: Optional[int] = 0,
         **kwargs,
     ):
         """Convert vector shapes into raster
@@ -655,9 +656,11 @@ class GeoTile:
             value_col: str
                 The column name of the vector to be rasterized
                 If None, the rasterization will be binary otherwise the rasterization will be the based on value of the column
-            no_data_val: int
+            no_data: int
                 The no data value of the raster.
                 If None, the no data value of the raster will be the same as the input raster
+            fill: int
+                The fill value of the raster (e.g. 0)
             kwargs: dict
                 # rasterio.rasterize.rasterize (e.g. fill, transform etc.)
                 The kwargs from rasterio.rasterize can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.rasterize.html
@@ -670,7 +673,7 @@ class GeoTile:
         Examples:
             >>> from geotile import GeoTile
             >>> gt = GeoTile('/path/to/raster/file.tif')
-            >>> gt.rasterize_vector('/path/to/vector.shp', '/path/to/output/file.tif')
+            >>> gt.rasterize_vector('/path/to/vector.shp', '/path/to/output/file.tif', fill=0)
         """
 
         # open the input vector
@@ -679,6 +682,9 @@ class GeoTile:
         # check the coordinate system for both raster and vector and reproject vector if necessary
         raster_crs = self.meta["crs"]
         if raster_crs != df.crs:
+            print(
+                f"CRS of raster doesn't match with vector. Reprojecting the vector ({df.crs}) to the raster coordinate system ({raster_crs})"
+            )
             df = df.to_crs(raster_crs)
 
         # if value column is specified, rasterize the vector based on value column else bianary classification
@@ -686,7 +692,11 @@ class GeoTile:
 
         # rasterize the vector based on raster metadata
         mask = rasterize(
-            dataset, self.ds.shape, transform=self.meta["transform"], **kwargs
+            dataset,
+            self.ds.shape,
+            transform=self.meta["transform"],
+            fill=fill,
+            **kwargs,
         )
         mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
 
@@ -705,7 +715,7 @@ class GeoTile:
 
         # update the metadata
         meta = self.meta.copy()
-        meta.update({"count": 1, "dtype": self.get_dtype(mask), "nodata": no_data_val})
+        meta.update({"count": 1, "dtype": self.get_dtype(mask), "nodata": no_data})
 
         # write the output raster
         with rio.open(out_path, "w", **meta) as outds:
