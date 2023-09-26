@@ -639,7 +639,6 @@ class GeoTile:
         out_path: str,
         value_col=None,
         no_data: Optional[int] = None,
-        fill: Optional[int] = 0,
         **kwargs,
     ):
         """Convert vector shapes into raster
@@ -658,9 +657,7 @@ class GeoTile:
                 If None, the rasterization will be binary otherwise the rasterization will be the based on value of the column
             no_data: int
                 The no data value of the raster.
-                If None, the no data value of the raster will be the same as the input raster
-            fill: int
-                The fill value of the raster (e.g. 0)
+                Default value is None.
             kwargs: dict
                 # rasterio.rasterize.rasterize (e.g. fill, transform etc.)
                 The kwargs from rasterio.rasterize can be used here: https://rasterio.readthedocs.io/en/latest/api/rasterio.rasterize.html
@@ -695,23 +692,9 @@ class GeoTile:
             dataset,
             self.ds.shape,
             transform=self.meta["transform"],
-            fill=fill,
             **kwargs,
         )
         mask = np.reshape(mask, (1, mask.shape[0], mask.shape[1]))
-
-        # if no_data_val is None, use the nodata value from the raster
-        if no_data_val is None:
-            no_data_val = self.meta["nodata"]
-
-        # if the dtype is float, set the no data value to 0
-        if (
-            (self.meta["nodata"] == np.nan)
-            and (no_data_val is None)
-            and (self.get_dtype(mask) not in _int_dtypes)
-        ):
-            print("The dtype of the raster is float, setting the no data value to 0")
-            no_data_val = 0  # if the dtype is float, set the no data value to 0
 
         # update the metadata
         meta = self.meta.copy()
