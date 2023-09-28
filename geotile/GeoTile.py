@@ -461,9 +461,7 @@ class GeoTile:
         prefix = prefix or ""
 
         # if data_type, update the meta
-        if dtype:
-            meta.update({"dtype": dtype})
-            dtype = dtype
+        meta.update({"dtype": dtype or self.get_dtype(self.tile_data)})
 
         # iterate through the offsets and windows_data and save the tiles
         for i, ((col_off, row_off), wd, wt) in enumerate(
@@ -489,7 +487,66 @@ class GeoTile:
 
             # save the tiles with new metadata
             with rio.open(tile_path, "w", **meta) as outds:
-                outds.write(wd.astype(dtype))
+                outds.write(wd.astype(meta["dtype"]))
+
+    def merge_tiles(
+        self,
+        output_path: str,
+        out_bands: Optional[list] = None,
+        image_format: Optional[str] = None,
+        dtype: Optional[str] = None,
+    ):
+        """Merge the tiles and save the merged raster.
+        Make sure the tiles are generated before merging and all the tiles having similar properties (eg. dtype, crs, transform)
+
+        Parameters
+        ----------
+            output_path : str
+                Path to the output raster
+            out_bands : list
+                The bands to save (eg. [3, 2, 1]), if None, the output bands will be same as the input raster bands
+            image_format : str
+                The image format (eg. tif), if None, the image format will be the same as the input raster format (eg. tif)
+            dtype : str, np.dtype
+                The output dtype (eg. uint8, float32), if None, the dtype will be the same as the input raster
+            meta: dict
+                The metadata of the output raster.
+                If provided, the output raster will be created with the provided metadata
+                else the output raster will be created with the metadata of the input raster or the other given parameters
+
+        Returns
+        -------
+            None: save the merged raster to the output folder
+
+        Examples
+        --------
+            >>> from geotile import GeoTile
+            >>> gt = GeoTile('/path/to/raster/file.tif')
+            >>> gt.generate_raster_tiles(save_tiles=False)
+            >>> gt.merge_tiles('/path/to/output/file.tif')
+        """
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
+
+        # if data_type, update the meta
+        if dtype:
+            self.meta.update({"dtype": dtype})
+
+        # if out_bands is None, update the meta with number of bands
+        if out_bands is None:
+            self.meta.update({"count": self.tile_data.shape[-1]})
+            out_bands = [i + 1 for i in range(0, self.ds.count)]
+
+        else:
+            self.meta.update({"count": len(out_bands)})
+
+        # check if image_format is None
+        image_format = image_format or pathlib.Path(self.path).suffix
+
+        # write the output raster
+        with rio.open(output_path, "w", **self.meta) as outds:
+            outds.write(self.tile_data[:, :, :, out_bands].astype(self.meta["dtype"]))
 
     def normalize_tiles(self):
         """Normalize the tiles between 0 and 1 (MinMaxScaler)
