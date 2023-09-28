@@ -550,6 +550,9 @@ class GeoTile:
             file_name : str
                 Path or name of the output numpy file
 
+            dtype : str, np.dtype
+                The output dtype (eg. uint8, float32), if None, the dtype will be the same as the input raster
+
         Returns
         -------
             None: save the tiles to the output folder, the shape of the numpy file will be (n, tile_x, tile_y, band)
@@ -568,6 +571,10 @@ class GeoTile:
         # if self.tile_data is list, convert it to numpy array
         if isinstance(self.tile_data, list):
             self.tile_data = np.array(self.tile_data)
+
+        # if data_type is none, get the appropriate dtype
+        if dtype is None:
+            dtype = self.get_dtype(self.tile_data)
 
         # save the numpy file
         np.save(file_name, self.tile_data.astype(dtype))
