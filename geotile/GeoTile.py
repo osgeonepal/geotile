@@ -542,6 +542,54 @@ class GeoTile:
         # convert nan values to zero
         self.tile_data = np.nan_to_num(self.tile_data)
 
+    def drop_nan_tiles(self):
+        """Drop the tiles with nan values
+
+        Returns
+        -------
+            None: Drop the tiles with nan values. The dropped tiles will be lost forever
+
+        Examples
+        --------
+            >>> from geotile import GeoTile
+            >>> gt = GeoTile('/path/to/raster/file.tif')
+            >>> gt.generate_raster_tiles(save_tiles=False)
+            >>> gt.drop_nan_tiles()
+        """
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
+
+        # drop the tiles with nan values and also drop corresponding window transform and offsets
+        nan_index = np.argwhere(np.isnan(self.tile_data).any(axis=(1, 2, 3)))
+        self.tile_data = np.delete(self.tile_data, nan_index, axis=0)
+        self.window_transform = np.delete(self.window_transform, nan_index, axis=0)
+        self.offsets = np.delete(self.offsets, nan_index, axis=0)
+
+    def drop_zero_value_tiles(self):
+        """Drop the tiles with all zero values
+
+        Returns
+        -------
+            None: Drop the tiles with all zero values. The dropped tiles will lost forever
+
+        Examples
+        --------
+            >>> from geotile import GeoTile
+            >>> gt = GeoTile('/path/to/raster/file.tif')
+            >>> gt.generate_raster_tiles(save_tiles=False)
+            >>> gt.drop_all_zero_value_tiles()
+        """
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
+
+        # drop the tiles with nan values and also drop corresponding window transform and offsets
+        zero_index = np.argwhere(np.all(self.tile_data == 0, axis=(1, 2, 3)))
+        self.tile_data = np.delete(self.tile_data, zero_index, axis=0)
+        self.window_transform = np.delete(self.window_transform, zero_index, axis=0)
+        self.offsets = np.delete(self.offsets, zero_index, axis=0)
+
     def save_numpy(self, file_name: str, dtype: Optional[str] = None):
         """Save the tiles to the output folder
 
