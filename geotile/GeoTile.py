@@ -510,6 +510,11 @@ class GeoTile:
         if isinstance(self.tile_data, list):
             self.tile_data = np.array(self.tile_data)
 
+        # if datatype is int based (eg. uint8, uint16, int8, int16), convert those to float32 for normalization
+        # if not changed, the normalization will only generate 0 and 1 values for the tiles
+        if self.tile_data.dtype in _int_dtypes:
+            self.tile_data = self.tile_data.astype("float32")
+
         # find max and min values in whole tiles on each channel
         # my windows_data shape: (n, tile_y, tile_x, band)
         max_values = np.max(self.tile_data, axis=(0, 1, 2))
