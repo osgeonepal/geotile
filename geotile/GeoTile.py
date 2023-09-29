@@ -292,7 +292,7 @@ class GeoTile:
         self.stride_y = stride_y
 
         # create the output folder if it doesn't exist
-        if not os.path.exists(output_folder):
+        if not os.path.exists(output_folder) and save_tiles is True:
             os.makedirs(output_folder)
 
         # offset calculation
