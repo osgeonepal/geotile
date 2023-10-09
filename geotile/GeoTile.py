@@ -198,33 +198,14 @@ class GeoTile:
             >>> from geotile import GeoTile
             >>> gt = GeoTile('/path/to/raster/file.tif')
             >>> data_array = np.array([1, 2, 3, 4])
-            >>> gt.get_appropriate_dtype(data_array)
+            >>> gt.get_dtype(data_array)
                 'uint8'
         """
-
-        # min and max value of the data array, ignore nan values
-        min_value = np.nanmin(data_array)
-        max_value = np.nanmax(data_array)
-
-        # check if the data array is positive or negative
-        if min_value >= 0:
-            if max_value <= 255:
-                return "uint8"
-            elif max_value <= 65535:
-                return "uint16"
-            elif max_value <= 4294967295:
-                return "uint32"
-            else:
-                return "float64"
+        if isinstance(data_array, np.ndarray):
+            return str(data_array.dtype)
+        
         else:
-            if min_value >= -128 and max_value <= 127:
-                return "int8"
-            elif min_value >= -32768 and max_value <= 32767:
-                return "int16"
-            elif min_value >= -2147483648 and max_value <= 2147483647:
-                return "int32"
-            else:
-                return "float64"
+            return 'Input is not a NumPy array.'
 
     def generate_tiles(
         self,
