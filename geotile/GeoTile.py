@@ -530,7 +530,8 @@ class GeoTile:
 
         # write the output raster
         with rio.open(output_path, "w", **self.meta) as outds:
-            outds.write(tile_data[:, out_bands, :, :].astype(self.meta["dtype"]))
+            for tiles in tile_data:
+                outds.write(tiles[out_bands, :, :].astype(self.meta["dtype"]))
 
     def normalize_tiles(self):
         """Normalize the tiles between 0 and 1 (MinMaxScaler)
