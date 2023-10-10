@@ -473,7 +473,6 @@ class GeoTile:
     def merge_tiles(
         self,
         output_path: str,
-        out_bands: Optional[list] = None,
         image_format: Optional[str] = None,
         dtype: Optional[str] = None,
     ):
@@ -484,8 +483,6 @@ class GeoTile:
         ----------
             output_path : str
                 Path to the output raster
-            out_bands : list
-                The bands to save (eg. [3, 2, 1]), if None, the output bands will be same as the input raster bands
             image_format : str
                 The image format (eg. tif), if None, the image format will be the same as the input raster format (eg. tif)
             dtype : str, np.dtype
@@ -514,13 +511,8 @@ class GeoTile:
         if dtype:
             self.meta.update({"dtype": dtype})
 
-        # if out_bands is None, update the meta with number of bands
-        if out_bands is None:
-            self.meta.update({"count": self.tile_data.shape[-1]})
-            out_bands = [i + 1 for i in range(0, self.ds.count)]
-
-        else:
-            self.meta.update({"count": len(out_bands)})
+        # update the meta with number of bands
+        self.meta.update({"count": self.tile_data.shape[-1]})
 
         # check if image_format is None
         image_format = image_format or pathlib.Path(self.path).suffix
@@ -531,7 +523,7 @@ class GeoTile:
         # write the output raster
         with rio.open(output_path, "w", **self.meta) as outds:
             for tiles in tile_data:
-                outds.write(tiles[out_bands, :, :].astype(self.meta["dtype"]))
+                outds.write(tiles.astype(self.meta["dtype"]))
 
     def normalize_tiles(self):
         """Normalize the tiles between 0 and 1 (MinMaxScaler)
