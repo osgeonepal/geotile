@@ -525,9 +525,12 @@ class GeoTile:
         # check if image_format is None
         image_format = image_format or pathlib.Path(self.path).suffix
 
+        # change numpy shape to (n, bands, x_tile, y_tile)
+        tile_data = np.moveaxis(self.tile_data, -1, 1)
+
         # write the output raster
         with rio.open(output_path, "w", **self.meta) as outds:
-            outds.write(self.tile_data[:, :, :, out_bands].astype(self.meta["dtype"]))
+            outds.write(tile_data[:, out_bands, :, :].astype(self.meta["dtype"]))
 
     def normalize_tiles(self):
         """Normalize the tiles between 0 and 1 (MinMaxScaler)
