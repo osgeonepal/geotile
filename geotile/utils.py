@@ -5,6 +5,8 @@ from typing import Optional
 import rasterio as rio
 from rasterio.merge import merge
 
+import fiona
+
 
 # mosaic the tiles
 def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 'tif', **kwargs):
