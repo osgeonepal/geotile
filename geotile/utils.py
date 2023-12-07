@@ -1,6 +1,6 @@
 import os
 import glob
-from typing import Optional
+from typing import Optional, Union
 
 import rasterio as rio
 from rasterio.merge import merge
@@ -66,7 +66,7 @@ def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 't
 
 
 # vectorize the tiles
-def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask: Optional[str] = None):
+def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, raster_values: Optional[Union[str, list]] = 'all', mask: Optional[str] = None):
     """Vectorize the raster
 
         This method is used to vectorize the raster
@@ -79,6 +79,8 @@ def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask:
                 Path to the output file
             band: int
                 The band to be vectorized
+            raster_values: str, list
+                The values to be vectorized. Default is 'all'
 
         Returns
         -------
@@ -89,6 +91,7 @@ def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask:
         --------
             >>> from geotile import vectorize
             >>> vectorize('/path/to/input/raster.tif', '/path/to/output/file.shp')
+            >>> vectorize('/path/to/input/raster.tif', '/path/to/output/file.shp', raster_values=[1])
     """
 
     # Open the raster
@@ -98,9 +101,31 @@ def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask:
     # Vectorize the raster
     shapes = rio.features.shapes(raster, transform=src.transform, mask=mask)
 
+    # if remove_values is not 'all'; filter out the required records
+    records = []
+    if isinstance(raster_values, list):
+        for i, (geom, value) in enumerate(shapes):
+            if value in raster_values:
+                records.append({
+                    'geometry': geom,
+                    'properties': {'value': value},
+                })
+    
+    # if remove_values is None, add all shapes to the record
+    elif raster_values=='all':
+        for i, (geom, value) in enumerate(shapes):
+            records.append({
+                'geometry': geom,
+                'properties': {'value': value},
+            })
+
+    # else raise the exception
+    else:
+        raise ValueError("remove_values either should be 'all' or list of integers")
+
+
     # Save the vectorized raster
     with fiona.open(output_file, 'w', crs=src.crs, driver='ESRI Shapefile', schema={'geometry': 'Polygon', 'properties': [('value', 'int')]}) as dst:
-        for geom, value in shapes:
-            dst.write({'geometry': geom, 'properties': {'value': value}})
+        dst.writerecords(records)
 
     return output_file
