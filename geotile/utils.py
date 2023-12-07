@@ -89,6 +89,7 @@ def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, remov
         --------
             >>> from geotile import vectorize
             >>> vectorize('/path/to/input/raster.tif', '/path/to/output/file.shp')
+            >>> vectorize('/path/to/input/raster.tif', '/path/to/output/file.shp', remove_values=[0])
     """
 
     # Open the raster
