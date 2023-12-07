@@ -66,7 +66,7 @@ def mosaic(input_folder: str, output_file: str, image_format: Optional[str] = 't
 
 
 # vectorize the tiles
-def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask: Optional[str] = None):
+def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, remove_values: Optional[list] = None, mask: Optional[str] = None):
     """Vectorize the raster
 
         This method is used to vectorize the raster
@@ -98,9 +98,31 @@ def vectorize(input_raster: str, output_file:str, band: Optional[int] = 1, mask:
     # Vectorize the raster
     shapes = rio.features.shapes(raster, transform=src.transform, mask=mask)
 
+    # if remove_values is not None; filter out the required records
+    records = []
+    if isinstance(remove_values, list):
+        for i, (geom, value) in enumerate(shapes):
+            if value not in remove_values:
+                records.append({
+                    'geometry': geom,
+                        'properties': {'value': value},
+                })
+    
+    # if remove_values is None, add all shapes to the record
+    elif remove_values is None:
+        for i, (geom, value) in enumerate(shapes):
+            records.append({
+                'geometry': geom,
+                    'properties': {'value': value},
+            })
+
+    # else raise the exception
+    else:
+        raise ValueError("remove_values either should be None or list")
+
+
     # Save the vectorized raster
     with fiona.open(output_file, 'w', crs=src.crs, driver='ESRI Shapefile', schema={'geometry': 'Polygon', 'properties': [('value', 'int')]}) as dst:
-        for geom, value in shapes:
-            dst.write({'geometry': geom, 'properties': {'value': value}})
+        dst.writerecords(records)
 
-    return output_file
+    return output_files
