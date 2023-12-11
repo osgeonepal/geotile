@@ -444,9 +444,11 @@ class GeoTile:
         # if data_type, update the meta
         meta.update({"dtype": dtype or self.get_dtype(self.tile_data)})
 
-        # solve nodata related issue #56
-        if ((np.isnan(meta['nodata'])) and (meta['dtype'] in _int_dtypes)):
-            meta.update({'nodata': None})
+        # first check nodata is not None and nodata is instance of numeric value; issue #64
+        if(gt.meta['nodata'] is not None and isinstance(gt.meta['nodata'], (int, float))):
+            # solve nodata related issue #56
+            if ((np.isnan(meta['nodata'])) and (meta['dtype'] in _int_dtypes)):
+                meta.update({'nodata': None})
 
         # iterate through the offsets and windows_data and save the tiles
         for i, ((col_off, row_off), wd, wt) in enumerate(
