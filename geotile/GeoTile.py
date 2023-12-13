@@ -445,7 +445,7 @@ class GeoTile:
         meta.update({"dtype": dtype or self.get_dtype(self.tile_data)})
 
         # first check nodata is not None and nodata is instance of numeric value; issue #64
-        if(gt.meta['nodata'] is not None and isinstance(gt.meta['nodata'], (int, float))):
+        if(meta['nodata'] is not None and isinstance(meta['nodata'], (int, float))):
             # solve nodata related issue #56
             if ((np.isnan(meta['nodata'])) and (meta['dtype'] in _int_dtypes)):
                 meta.update({'nodata': None})
