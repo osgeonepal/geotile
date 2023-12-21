@@ -127,6 +127,38 @@ class GeoTile:
         a, b, c, d, e, f, _, _, _ = window_transform
         return Affine(a, b, c, d, e, f)
 
+    def _match_nodata(self, dtype):
+        """Match the nodata value with the dtype
+
+        Parameters
+        ----------
+            dtype: str
+                The dtype of the raster
+
+        Returns
+        -------
+            int: The nodata value of the raster
+
+        Examples
+        --------
+            >>> from geotile import GeoTile
+            >>> gt = GeoTile('/path/to/raster/file.tif')
+            >>> gt._match_nodata('uint8')
+                255
+        """
+        dtypes = {
+            "uint8": 255,
+            "uint16": 65535,
+            "uint32": 4294967295,
+            "int8": -128,
+            "int16": -32768,
+            "int32": -2147483648,
+            "float32": np.nan,
+            "float64": np.nan,
+        }
+
+        return dtypes[dtype] if dtype in dtypes.keys() else None
+
     def shuffle_tiles(self, random_state: Optional[int] = None):
         """Shuffle the tiles
 
@@ -203,9 +235,9 @@ class GeoTile:
         """
         if isinstance(data_array, np.ndarray):
             return str(data_array.dtype)
-        
+
         else:
-            return 'Input is not a NumPy array.'
+            return "Input is not a NumPy array."
 
     def generate_tiles(
         self,
@@ -392,6 +424,7 @@ class GeoTile:
         prefix: Optional[str] = None,
         suffix: Optional[str] = None,
         image_format: Optional[str] = None,
+        nodata: Optional[int] = None,
         dtype: Optional[str] = None,
     ):
         """Save the tiles to the output folder
@@ -406,7 +439,8 @@ class GeoTile:
                 The suffix of the tile name (eg. _img)
             image_format : str
                 The image format (eg. tif), if None, the image format will be the same as the input raster format (eg. tif)
-
+            nodata : int, float
+                The nodata value of the raster, if None, the nodata value will be assigned based on the dtype (either max or min value)
             dtype : str, np.dtype
                 The output dtype (eg. uint8, float32), if None, the dtype will be the same as the input raster
 
@@ -444,11 +478,14 @@ class GeoTile:
         # if data_type, update the meta
         meta.update({"dtype": dtype or self.get_dtype(self.tile_data)})
 
+        # if nodata is None, update the meta with appropriate nodata value
+        meta.update({"nodata": nodata or self._match_nodata(meta["dtype"])})
+
         # first check nodata is not None and nodata is instance of numeric value; issue #64
-        if(meta['nodata'] is not None and isinstance(meta['nodata'], (int, float))):
+        if meta["nodata"] is not None and isinstance(meta["nodata"], (int, float)):
             # solve nodata related issue #56
-            if ((np.isnan(meta['nodata'])) and (meta['dtype'] in _int_dtypes)):
-                meta.update({'nodata': None})
+            if (np.isnan(meta["nodata"])) and (meta["dtype"] in _int_dtypes):
+                meta.update({"nodata": None})
 
         # iterate through the offsets and windows_data and save the tiles
         for i, ((col_off, row_off), wd, wt) in enumerate(
