@@ -603,6 +603,40 @@ class GeoTile:
                 self.tile_data[:, :, :, channel] - min_values[channel]
             ) / (max_values[channel] - min_values[channel])
 
+    def standardize_tiles(self):
+        """Normalize the tiles using z-score (StandardScaler)
+
+        Returns
+        -------
+            None: Normalize the tiles. The normalized tiles will be stored in the class
+
+        Examples
+        --------
+            >>> from geotile import GeoTile
+            >>> gt = GeoTile('/path/to/raster/file.tif')
+            >>> gt.generate_raster_tiles(save_tiles=False)
+            >>> gt.standardize_tiles()
+        """
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
+
+        # if datatype is int based (eg. uint8, uint16, int8, int16), convert those to float32 for normalization
+        # if not changed, the normalization will only generate 0 and 1 values for the tiles
+        if self.tile_data.dtype in _int_dtypes:
+            self.tile_data = self.tile_data.astype("float32")
+
+        # find mean and std values in whole tiles on each channel
+        # my windows_data shape: (n, tile_y, tile_x, band)
+        mean_values = np.mean(self.tile_data, axis=(0, 1, 2))
+        std_values = np.std(self.tile_data, axis=(0, 1, 2))
+
+        # Normalize the tiles and update the tile_data for each channel independently
+        for channel in range(self.tile_data.shape[-1]):
+            self.tile_data[:, :, :, channel] = (
+                self.tile_data[:, :, :, channel] - mean_values[channel]
+            ) / std_values[channel]
+
     def convert_nan_to_zero(self):
         """Convert nan values to zero
 
