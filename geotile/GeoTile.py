@@ -663,7 +663,7 @@ class GeoTile:
 
         Returns
         -------
-            None: Convert nan values to zero. The converted tiles will be stored in the class
+            None: Convert nodata values to zero. The converted tiles will be stored in the class
 
         Examples
         --------
