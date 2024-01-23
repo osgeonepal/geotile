@@ -658,6 +658,27 @@ class GeoTile:
         # convert nan values to zero
         self.tile_data = np.nan_to_num(self.tile_data)
 
+    def convert_nodata_to_zero(self):
+        """Convert nodata values to zero
+
+        Returns
+        -------
+            None: Convert nodata values to zero. The converted tiles will be stored in the class
+
+        Examples
+        --------
+            >>> from geotile import GeoTile
+            >>> gt = GeoTile('/path/to/raster/file.tif')
+            >>> gt.generate_raster_tiles(save_tiles=False)
+            >>> gt.convert_nodata_to_zero()
+        """
+        # if self.tile_data is list, convert it to numpy array
+        if isinstance(self.tile_data, list):
+            self.tile_data = np.array(self.tile_data)
+
+        # convert nodata values to zero
+        self.tile_data[self.tile_data == self.meta["nodata"]] = 0
+
     def drop_nan_tiles(self):
         """Drop the tiles with nan values
 
