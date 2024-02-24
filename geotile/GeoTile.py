@@ -3,6 +3,7 @@ import os
 import itertools
 from typing import Optional
 import pathlib
+import math
 
 # numpy library
 import numpy as np
@@ -555,18 +556,35 @@ class GeoTile:
             self.meta.update({"dtype": dtype})
 
         # update the meta with number of bands
-        self.meta.update({"count": self.tile_data.shape[-1]})
+        self.meta.update({"count": self.meta['count']})
 
         # check if image_format is None
         image_format = image_format or pathlib.Path(self.path).suffix
 
-        # change numpy shape to (n, bands, x_tile, y_tile)
-        tile_data = np.moveaxis(self.tile_data, -1, 1)
-
+        # Added module
+        x_gen = math.ceil(self.meta['height']/self.stride_x)
+        y_gen = math.ceil(self.meta['width']/self.stride_y)
+        new_height, new_width = x_gen*self.stride_x, y_gen*self.stride_y
+        # print(x_gen, y_gen)
+        # print(new_height, new_width)
+        
+        # Update the new height, width
+        self.meta.update({"height": new_height})
+        self.meta.update({"width": new_width})
+    
+        # Fill in the zero_array
+        zero_array = np.zeros([self.meta['count'], new_height, new_width]) 
+        tile_data_new = np.moveaxis(self.tile_data, -1, 1)
+    
+        # Loop over each block and assign it to the corresponding position in the larger raster
+        for i, block in enumerate(tile_data_new):
+            x_offset = (i % x_gen) * self.stride_x
+            y_offset = (i // y_gen) * self.stride_y
+            zero_array[:, x_offset:x_offset+self.stride_x, y_offset:y_offset+self.stride_y] = block
+           
         # write the output raster
-        with rio.open(output_path, "w", **self.meta) as outds:
-            for tiles in tile_data:
-                outds.write(tiles.astype(self.meta["dtype"]))
+        with rio.open(output_path, "w",  **self.meta) as outds:
+            outds.write(zero_array.astype(self.meta["dtype"]))
 
     def normalize_tiles(self):
         """Normalize the tiles between 0 and 1 (MinMaxScaler)
