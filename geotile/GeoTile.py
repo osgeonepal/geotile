@@ -321,12 +321,16 @@ class GeoTile:
         # iterate through the offsets and save the tiles
         for i, (col_off, row_off) in enumerate(self.offsets):
             window = windows.Window(
-                col_off=col_off, row_off=row_off, width=self.tile_x, height=self.tile_y
+                col_off=col_off, 
+                row_off=row_off, 
+                width=self.tile_x, 
+                height=self.tile_y
             )
             transform = windows.transform(window, self.ds.transform)
 
             # convert the window transform to affine transform and append to the list
             transform = self._windows_transform_to_affine(transform)
+            
             self.window_transform.append(transform)
 
             # copy the meta data
@@ -335,7 +339,11 @@ class GeoTile:
 
             # update the meta data
             meta.update(
-                {"width": window.width, "height": window.height, "transform": transform}
+                {
+                    "width": window.width, 
+                    "height": window.height, 
+                    "transform": transform
+                }
             )
 
             # if the output bands is not None, add all bands to the output dataset
@@ -346,10 +354,18 @@ class GeoTile:
             else:
                 meta.update({"count": len(out_bands)})
 
-            # read the window data and append to the list
+            # read the window data and append to the list 
             single_tile_data = self.ds.read(
-                out_bands, window=window, fill_value=nodata, boundless=True
+                out_bands, 
+                window=window, 
+                fill_value=nodata, 
+                boundless=False
             )
+
+            if single_tile_data.shape[1] != single_tile_data.shape[2]:
+                self.window_transform.remove(transform)
+                continue    
+
             self.tile_data.append(single_tile_data)
 
             # if data_type, update the meta
@@ -405,10 +421,13 @@ class GeoTile:
                 with rio.open(tile_path, "w", **meta) as outds:
                     outds.write(
                         self.ds.read(
-                            out_bands, window=window, fill_value=nodata, boundless=True
+                            out_bands, 
+                            window=window, 
+                            fill_value=nodata, 
+                            boundless=False
                         ).astype(dtype)
                     )
-
+            
         if not save_tiles:
             # convert list to numpy array
             self.tile_data = np.array(self.tile_data)
